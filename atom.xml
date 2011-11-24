@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My Octopress Blog]]></title>
+  <title><![CDATA[runforever]]></title>
   <link href="http://runforever.github.com/atom.xml" rel="self"/>
   <link href="http://runforever.github.com/"/>
-  <updated>2011-11-23T16:48:43+08:00</updated>
+  <updated>2011-11-24T07:50:30+08:00</updated>
   <id>http://runforever.github.com/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[runforever]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
