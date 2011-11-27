@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[runforever]]></title>
-  <link href="http://runforever.github.com/atom.xml" rel="self"/>
+  <title><![CDATA[Category: life | runforever]]></title>
+  <link href="http://runforever.github.com/blog/categories/life/atom.xml" rel="self"/>
   <link href="http://runforever.github.com/"/>
   <updated>2011-11-27T15:44:52+08:00</updated>
   <id>http://runforever.github.com/</id>
