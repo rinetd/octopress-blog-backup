@@ -4,7 +4,7 @@
   <title><![CDATA[runforever]]></title>
   <link href="http://runforever.github.com/atom.xml" rel="self"/>
   <link href="http://runforever.github.com/"/>
-  <updated>2011-11-27T15:44:52+08:00</updated>
+  <updated>2011-11-27T15:49:46+08:00</updated>
   <id>http://runforever.github.com/</id>
   <author>
     <name><![CDATA[runforever]]></name>
@@ -38,7 +38,8 @@
 <p><a href="http://blog.eddie.com.tw/2011/10/11/how-to-install-octopress-on-heroku/">参考的是这篇文章</a>， 官方的文档也讲得挺好</p>
 
 <p>一些有用的资源:<br/>
-<a href="http://markdown.tw/#link">markdown 语法</a></p>
+<a href="http://markdown.tw/#link">markdown 语法</a><br/>
+<a href="http://desizen.com/freebies/git-and-github-tutorials/">git 使用教程</a></p>
 ]]></content>
   </entry>
   
