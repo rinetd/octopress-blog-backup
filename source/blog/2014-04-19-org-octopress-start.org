@@ -1,0 +1,121 @@
+#+TITLE: octopress+org-mode写博客
+#+DATE: 2014-04-19
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES:
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+
+**** 主要内容
+     1. 安装octopress
+        + 什么是octopress
+        + 基本安装
+        + 配置
+     2. 使用org-mode写博客
+        + 什么是org-mode
+        + 安装emacs24
+        + 使用高手配置
+        + 配置org-mode来写博客
+     3. 总结
+
+* 1 安装octopress
+** 什么是octopress
+   octopress 是一个静态blog，使用markdown语言来写文章，可以部署在github page上，\\
+有非常漂亮的代码高亮插件，blog for hacker是他的哲学，简单、实用、COOL.\\
+** 基本安装
+    主要参考 [[http://octopress.org/docs/setup/][官网文档]], 写的比较好的 [[http://blog.segmentfault.com/yaashion_xiang/1190000000364677][中文文档]] ，安装比较简单，\\
+跟着教程走基本都能成功。\\
+** 配置
+   SCHEDULED: <2014-04-19 六>
+    评论配置使用 *Disqus*, 区要到 [[files://disqus.com/admin/signup/?utm_source%3DNew-Site][http://disqus.com/admin/signup/?utm_source=new-site]] 注册，
+注册完成后需要到admin的settings里添加相应的sitename和siteurl. \\
+然后修改 octopress里的 *_config.yaml文件* \\
+#+begin_src yaml
+#disqus comments
+disqus_short_name: your disqus name
+disqus_show_comment_count: true
+#+end_src
+
+配置成功后，运行\\
+#+begin_src shell
+rake generic
+rake preview
+# 在浏览器中输入127.0.0.1:4000预览
+#+end_src
+
+预览没有问题就可以使用：\\
+#+begin_src shell
+rake deploy #上传到github page，在浏览器输入相应的地址便可以查看，可能会有所延时
+#+end_src
+
+* 2. 使用org-mode来写博客
+** 什么是org-mode
+org-mode 的哲学是organize your life in plaintext，是emacs中的一个模式，你可以用它做gtd 、todo、\\
+project plan 、文学编程，类似wytwyg（所想即所得），可以将文章导出为html、pdf等文件，还可以与版本 \\
+控制结合起来，在emacs下可以有很多hack的功能。\\
+
+** 安装emacs24
+mac实用brew可以直接安装：
+#+begin_src shell
+brew install emacs
+#+end_src
+
+** 配置emacs
+直接使用大师purcell的配置[[ https://github.com/purcell/emacs.d]]\\
+按照上面的教程完成基本配置之后，需要到 *~/.emacs.d/lisp/* 下建立 *init-local.el*, \\
+#+begin_src shell
+touch ~/.emacs.d/lisp/init-local.el
+#+end_src
+自己的配置都写到这个文件里。\\
+
+** 配置使用org-mode 来写octopress
+打开emacs，按 /M-x/ 输入命令 /desktop-clear/ 清除emacs的sessions ，\\
+按 /m-x/ 输入 /package-list-packages/ 然后enter，\\
+通过C-s查找org和org-octopress, 紧接着用i标记安装，然后按x执行安装。\\
+
+安装结束后重启emacs， 在init-local.el输入以下配置。\\
+#+begin_src lisp
+;;; org mode
+;;; 打开后缀名为org的文件时自动启用org mode
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+(global-font-lock-mode 1)
+
+;;; org octopress
+;;; 注意将optopress路径需要替换成你的optopress路径
+(require 'org-octopress)
+(setq org-octopress-directory-top       "~/CodeRepo/GitRepo/octopress/source/org_pos/source")
+(setq org-octopress-directory-posts     "~/CodeRepo/GitRepo/octopress/source/_posts")
+(setq org-octopress-directory-org-top   "~/CodeRepo/GitRepo/octopress/source")
+(setq org-octopress-directory-org-posts "~/CodeRepo/GitRepo/octopress/source/blog")
+;;; 需要拷贝https://github.com/yoshinari-nomura/org-octopress 的setupfile-sample.org 到下面的目录
+;;; 并且需要更换名字
+(setq org-octopress-setup-file          "~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org")
+
+(provide 'init-local)
+#+END_SRC
+
+使用\\
+#+BEGIN_QUOTE
+1. 打开emacs
+2. M-x org-octopress
+3. Compose YYYY-MM-DD-title.org in source/blog directory.
+4. C-c C-e (org-export-dispatch) and type “P” “x” “octopress”
+
+5. In command line terminal:
+rake preview
+#+END_QUOTE
+
+* 总结
+** 为什么我要使用emacs
+VIM 我已经使用的很熟练了，但是它始终是编辑器之神，也就是编辑代码\\
+快一些而已， 除此之外在它上面已经找不到让人兴奋的感觉了， 而emacs的\\
+哲学是神的编辑器， 对于我来说它是一个操作系统， 你可以控制一切你想控制\\
+的东西， 可以使用elisp在上面hack， 让你更多的去思考， 而不仅仅是编辑。\\
+
+** octopress + emacs的org mode
+这个模式是我在使用emacs中想出来的， 事实也证明了在emacs的世界里， 没有\\
+做不到的， 只有你想不到的， 以后我会通过这个模式记录学习的点点滴滴， 管理\\
+好自己的知识， 用emacs去做一些cool的事情。\\
+
+{{{more}}}
