@@ -55,16 +55,16 @@ octopress 是一个静态blog，使用markdown语言来写文章，可以部署�
 <div class="outline-text-3" id="text-1-2">
 <p>
 主要参考 <a href="http://octopress.org/docs/setup/">官网文档</a>, 写的比较好的 <a href="http://blog.segmentfault.com/yaashion_xiang/1190000000364677">中文文档</a> ，安装比较简单，<br  />
-跟着教程走基本都能成功。<br  />
+    跟着教程走基本都能成功。<br  />
 </p>
 </div>
 </div>
 <div id="outline-container-sec-1-3" class="outline-3">
-<h3 id="sec-1-3">配置</h3>
+<h3 id="sec-1-3">配置:</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
     评论配置使用 <b>Disqus</b>, 区要到 <i><a href="http://disqus.com/admin/signup/?utm_source=new-site">http://disqus.com/admin/signup/?utm_source=new-site</a></i> 注册，
-注册完成后需要到admin的settings里添加相应的sitename和siteurl. <b><a href="https://hello.com">https://hello.com</a></b>  <br  />
+注册完成后需要到admin的settings里添加相应的sitename和siteurl. <br  />
 然后修改 octopress里的 <b>_config.yaml文件</b> <br  />
 </p>
 <div class="org-src-container">
@@ -148,6 +148,10 @@ mac实用brew可以直接安装：
 <h3 id="sec-2-4">配置使用org-mode 来写octopress</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
+插件<a href="https://github.com/yoshinari-nomura/org-octopress">地址</a> 有详细文档 <br  />
+</p>
+
+<p>
 打开emacs，按 <i>M-x</i> 输入命令 <i>desktop-clear</i> 清除emacs的sessions ，<br  />
 按 <i>m-x</i> 输入 <i>package-list-packages</i> 然后enter，<br  />
 通过C-s查找org和org-octopress, 紧接着用i标记安装，然后按x执行安装。<br  />
@@ -178,6 +182,13 @@ mac实用brew可以直接安装：
 </pre>
 </div>
 
+<p>
+修改 octopress 中的_config.yaml
+</p>
+<pre class="example">
+# 修改permalink 为如下
+permalink: /blog/:year-:month-:day-:title.html
+</pre>
 <p>
 使用<br  />
 </p>

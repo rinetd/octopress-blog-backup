@@ -24,11 +24,11 @@
    octopress 是一个静态blog，使用markdown语言来写文章，可以部署在github page上，\\
 有非常漂亮的代码高亮插件，blog for hacker是他的哲学，简单、实用、COOL.\\
 ** 基本安装
-    主要参考 [[http://octopress.org/docs/setup/][官网文档]], 写的比较好的 [[http://blog.segmentfault.com/yaashion_xiang/1190000000364677][中文文档]] ，安装比较简单，\\
-跟着教程走基本都能成功。\\
-** 配置
+    主要参考 [[http:////octopress.org/docs/setup/][官网文档]], 写的比较好的 [[http:////blog.segmentfault.com/yaashion_xiang/1190000000364677][中文文档]] ，安装比较简单，\\
+    跟着教程走基本都能成功。\\
+** 配置:
    SCHEDULED: <2014-04-19 六>
-    评论配置使用 *Disqus*, 区要到 [[files://disqus.com/admin/signup/?utm_source%3DNew-Site][http://disqus.com/admin/signup/?utm_source=new-site]] 注册，
+    评论配置使用 *Disqus*, 区要到 [[files://disqus.com/admin/signup/?utm_source%3DNew-Site][http:////disqus.com/admin/signup/?utm_source=new-site]] 注册，
 注册完成后需要到admin的settings里添加相应的sitename和siteurl. \\
 然后修改 octopress里的 *_config.yaml文件* \\
 #+begin_src yaml
@@ -62,7 +62,7 @@ brew install emacs
 #+end_src
 
 ** 配置emacs
-直接使用大师purcell的配置[[ https://github.com/purcell/emacs.d]]\\
+直接使用大师purcell的配置[[ https:////github.com/purcell/emacs.d]]\\
 按照上面的教程完成基本配置之后，需要到 *~/.emacs.d/lisp/* 下建立 *init-local.el*, \\
 #+begin_src shell
 touch ~/.emacs.d/lisp/init-local.el
@@ -70,6 +70,8 @@ touch ~/.emacs.d/lisp/init-local.el
 自己的配置都写到这个文件里。\\
 
 ** 配置使用org-mode 来写octopress
+插件[[https:////github.com/yoshinari-nomura/org-octopress][地址]] 有详细文档 \\
+
 打开emacs，按 /M-x/ 输入命令 /desktop-clear/ 清除emacs的sessions ，\\
 按 /m-x/ 输入 /package-list-packages/ 然后enter，\\
 通过C-s查找org和org-octopress, 紧接着用i标记安装，然后按x执行安装。\\
@@ -88,13 +90,18 @@ touch ~/.emacs.d/lisp/init-local.el
 (setq org-octopress-directory-posts     "~/CodeRepo/GitRepo/octopress/source/_posts")
 (setq org-octopress-directory-org-top   "~/CodeRepo/GitRepo/octopress/source")
 (setq org-octopress-directory-org-posts "~/CodeRepo/GitRepo/octopress/source/blog")
-;;; 需要拷贝https://github.com/yoshinari-nomura/org-octopress 的setupfile-sample.org 到下面的目录
+;;; 需要拷贝https:////github.com/yoshinari-nomura/org-octopress 的setupfile-sample.org 到下面的目录
 ;;; 并且需要更换名字
 (setq org-octopress-setup-file          "~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org")
 
 (provide 'init-local)
 #+END_SRC
 
+修改 octopress 中的_config.yaml
+#+BEGIN_EXAMPLE
+# 修改permalink 为如下
+permalink: /blog/:year-:month-:day-:title.html
+#+END_EXAMPLE
 使用\\
 #+BEGIN_QUOTE
 1. 打开emacs
