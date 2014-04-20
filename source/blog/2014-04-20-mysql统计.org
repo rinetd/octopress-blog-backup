@@ -1,0 +1,67 @@
+#+TITLE: MySQL统计
+#+DATE: 2014-04-20
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: MySql
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* 按日期统计
+代码：\\
+#+BEGIN_SRC SQL
+-- 按年统计
+SELECT YEAR(`date_field`), COUNT(*) AS `total`
+FROM `table`
+GROUP BY YEAR(`date_field`)
+
+-- 按年月统计
+SELECT YEAR(`date_field`), MONTH(`date_field`), COUNT(*) AS `total`
+FROM `table`
+GROUP BY YEAR(`date_field`), MONTH(`date_field`)
+
+-- 按年月日统计
+SELECT YEAR(`date_field`), MONTH(`date_filed`), COUNT(*) AS `total`
+FROM `table`
+GROUP BY YEAR(`date_field`), MONTH(`date_field`), DAY(`date_field`)
+
+#+END_SRC
+
+* 一个字段不同的统计条件
+使用 *CASE* 关键字\\
+代码：\\
+#+BEGIN_SRC SQL
+/* 我需要按月统计完成的订单中客户给5星评价和给4星评价的数目*/
+SELECT
+    YEAR(`finishtime`),
+    MONTH(`finishtime`),
+    (CASE WHEN `rate`=5 THEN 1 ELSE NULL END),
+    (CASE WHEN `rate`=4 THEN 1 ELSE NULL END),
+FROM `order`
+GROUP BY YEAR(`finishtime`), MONTH(`finishtime`)
+#+END_SRC
+
+* 杂项
+** 为什么使用 ` `
+为了区别SQL关键字和数据库的字段。\\
+
+** 为什么不用IS NULL 和 IS NOT NULL来过滤数据
+使用IS NULL 或这IS NOT NULL 无法命中索引，导致效率问题，\\
+可以使用 `field`>'' 或者 `field`>0替换上述情况。\\
+
+** SQL 规范
+SQL 的关键字都用大写。 \\
+
+** SQL注释
+#+BEGIN_SRC SQL
+-- 是单行注释
+/*多行注释*/
+#+END_SRC
+
+** MySQL 时间戳函数
+#+BEGIN_SRC SQL
+UNIX_TIMESTAMP(datetime)
+FROM_UNIXTIME(unixtime)
+#+END_SRC
+
+***** 最后更新[2014-04-20 日 20:24]
+{{{more}}}
