@@ -1,0 +1,22 @@
+#+TITLE: Emacs必知必会
+#+DATE: 2014-04-20
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: Emacs
+#+JEKYLL_PUBLISHED: false
+#+JEKYLL_COMMENTS: true
+
+* 必用快捷键
+#+BEGIN_QUOTE
+查找与光标相同的单词 *C-s C-w*
+替换单词 *M-%* 询问是否替换单词
+#+END_QUOTE
+
+* 必用插件
+#+BEGIN_QUOTE
+org: org-mode, 非常方便的记笔记工具。
+smartparens: 括号引号补全插件。
+windown-numbering: 窗口跳转插件，用M-1..9跳转。
+#+END_QUOTE
+
+{{{more}}}

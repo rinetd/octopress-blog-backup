@@ -28,7 +28,7 @@
     跟着教程走基本都能成功。\\
 ** 配置:
    SCHEDULED: <2014-04-19 六>
-    评论配置使用 *Disqus*, 区要到 [[files://disqus.com/admin/signup/?utm_source%3DNew-Site][http:////disqus.com/admin/signup/?utm_source=new-site]] 注册，
+    评论配置使用 *Disqus*, 需要到 [[files://disqus.com/admin/signup/?utm_source%3DNew-Site][http:////disqus.com/admin/signup/?utm_source=new-site]] 注册，
 注册完成后需要到admin的settings里添加相应的sitename和siteurl. \\
 然后修改 octopress里的 *_config.yaml文件* \\
 #+begin_src yaml
@@ -38,33 +38,34 @@ disqus_show_comment_count: true
 #+end_src
 
 配置成功后，运行\\
-#+begin_src shell
+#+begin_src sh
 rake generic
 rake preview
 # 在浏览器中输入127.0.0.1:4000预览
 #+end_src
 
 预览没有问题就可以使用：\\
-#+begin_src shell
+#+begin_src sh
 rake deploy #上传到github page，在浏览器输入相应的地址便可以查看，可能会有所延时
 #+end_src
 
 * 2. 使用org-mode来写博客
 ** 什么是org-mode
-org-mode 的哲学是organize your life in plaintext，是emacs中的一个模式，你可以用它做gtd 、todo、\\
-project plan 、文学编程，类似wytwyg（所想即所得），可以将文章导出为html、pdf等文件，还可以与版本 \\
-控制结合起来，在emacs下可以有很多hack的功能。\\
+org-mode 的哲学是organize your life in plaintext，是emacs中的一个模式，\\
+你可以用它做gtd 、todo、project plan 、文学编程，类似wytwyg（所想即所得），\\
+可以将文章导出为html、pdf等文件，还可以与版本控制结合起来，在emacs下可以\\
+有很多hack的功能。\\
 
 ** 安装emacs24
-mac实用brew可以直接安装：
-#+begin_src shell
+mac使用brew可以直接安装：
+#+begin_src sh
 brew install emacs
 #+end_src
 
 ** 配置emacs
 直接使用大师purcell的配置[[ https:////github.com/purcell/emacs.d]]\\
 按照上面的教程完成基本配置之后，需要到 *~/.emacs.d/lisp/* 下建立 *init-local.el*, \\
-#+begin_src shell
+#+begin_src sh
 touch ~/.emacs.d/lisp/init-local.el
 #+end_src
 自己的配置都写到这个文件里。\\

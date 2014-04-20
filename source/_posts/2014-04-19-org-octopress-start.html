@@ -63,15 +63,15 @@ octopress 是一个静态blog，使用markdown语言来写文章，可以部署�
 <h3 id="sec-1-3">配置:</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
-    评论配置使用 <b>Disqus</b>, 区要到 <i><a href="http://disqus.com/admin/signup/?utm_source=new-site">http://disqus.com/admin/signup/?utm_source=new-site</a></i> 注册，
+    评论配置使用 <b>Disqus</b>, 需要到 <i><a href="http://disqus.com/admin/signup/?utm_source=new-site">http://disqus.com/admin/signup/?utm_source=new-site</a></i> 注册，
 注册完成后需要到admin的settings里添加相应的sitename和siteurl. <br  />
 然后修改 octopress里的 <b>_config.yaml文件</b> <br  />
 </p>
 <div class="org-src-container">
 
-<pre class="src src-yaml"><span style="color: #ff0000;">#</span><span style="color: #ff0000;">disqus comments</span>
-<span style="color: #ffff00;">disqus_short_name</span>: your disqus name
-<span style="color: #ffff00;">disqus_show_comment_count</span>: <span style="color: #ff00ff;">true</span>
+<pre class="src src-yaml"><span style="color: #00ff00; font-style: italic;">#</span><span style="color: #00ff00; font-style: italic;">disqus comments</span>
+<span style="color: #0000ff;">disqus_short_name</span>: your disqus name
+<span style="color: #0000ff;">disqus_show_comment_count</span>: <span style="color: #00ffff;">true</span>
 </pre>
 </div>
 
@@ -80,9 +80,9 @@ octopress 是一个静态blog，使用markdown语言来写文章，可以部署�
 </p>
 <div class="org-src-container">
 
-<pre class="src src-shell">rake generic
+<pre class="src src-sh">rake generic
 rake preview
-# 在浏览器中输入127.0.0.1:4000预览
+<span style="color: #00ff00; font-style: italic;"># </span><span style="color: #00ff00; font-style: italic;">&#22312;&#27983;&#35272;&#22120;&#20013;&#36755;&#20837;127.0.0.1:4000&#39044;&#35272;</span>
 </pre>
 </div>
 
@@ -91,7 +91,7 @@ rake preview
 </p>
 <div class="org-src-container">
 
-<pre class="src src-shell">rake deploy #上传到github page，在浏览器输入相应的地址便可以查看，可能会有所延时
+<pre class="src src-sh">rake deploy <span style="color: #00ff00; font-style: italic;">#</span><span style="color: #00ff00; font-style: italic;">&#19978;&#20256;&#21040;github page&#65292;&#22312;&#27983;&#35272;&#22120;&#36755;&#20837;&#30456;&#24212;&#30340;&#22320;&#22336;&#20415;&#21487;&#20197;&#26597;&#30475;&#65292;&#21487;&#33021;&#20250;&#26377;&#25152;&#24310;&#26102;</span>
 </pre>
 </div>
 </div>
@@ -105,9 +105,10 @@ rake preview
 <h3 id="sec-2-1">什么是org-mode</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
-org-mode 的哲学是organize your life in plaintext，是emacs中的一个模式，你可以用它做gtd 、todo、<br  />
-project plan 、文学编程，类似wytwyg（所想即所得），可以将文章导出为html、pdf等文件，还可以与版本 <br  />
-控制结合起来，在emacs下可以有很多hack的功能。<br  />
+org-mode 的哲学是organize your life in plaintext，是emacs中的一个模式，<br  />
+你可以用它做gtd 、todo、project plan 、文学编程，类似wytwyg（所想即所得），<br  />
+可以将文章导出为html、pdf等文件，还可以与版本控制结合起来，在emacs下可以<br  />
+有很多hack的功能。<br  />
 </p>
 </div>
 </div>
@@ -116,11 +117,11 @@ project plan 、文学编程，类似wytwyg（所想即所得），可以将文�
 <h3 id="sec-2-2">安装emacs24</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
-mac实用brew可以直接安装：
+mac使用brew可以直接安装：
 </p>
 <div class="org-src-container">
 
-<pre class="src src-shell">brew install emacs
+<pre class="src src-sh">brew install emacs
 </pre>
 </div>
 </div>
@@ -135,7 +136,7 @@ mac实用brew可以直接安装：
 </p>
 <div class="org-src-container">
 
-<pre class="src src-shell">touch ~/.emacs.d/lisp/init-local.el
+<pre class="src src-sh">touch ~/.emacs.d/lisp/init-local.el
 </pre>
 </div>
 <p>
@@ -162,23 +163,23 @@ mac实用brew可以直接安装：
 </p>
 <div class="org-src-container">
 
-<pre class="src src-lisp"><span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">org mode</span>
-<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">&#25171;&#24320;&#21518;&#32512;&#21517;&#20026;org&#30340;&#25991;&#20214;&#26102;&#33258;&#21160;&#21551;&#29992;org mode</span>
-(add-to-list 'auto-mode-alist '(<span style="color: #00ff00;">"\\.org\\'"</span> . org-mode))
+<pre class="src src-lisp"><span style="color: #00ff00; font-style: italic;">;;; </span><span style="color: #00ff00; font-style: italic;">org mode</span>
+<span style="color: #00ff00; font-style: italic;">;;; </span><span style="color: #00ff00; font-style: italic;">&#25171;&#24320;&#21518;&#32512;&#21517;&#20026;org&#30340;&#25991;&#20214;&#26102;&#33258;&#21160;&#21551;&#29992;org mode</span>
+(add-to-list 'auto-mode-alist '(<span style="color: #00ffff;">"\\.org\\'"</span> . org-mode))
 (global-font-lock-mode 1)
 
-<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">org octopress</span>
-<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">&#27880;&#24847;&#23558;optopress&#36335;&#24452;&#38656;&#35201;&#26367;&#25442;&#25104;&#20320;&#30340;optopress&#36335;&#24452;</span>
-(<span style="color: #00ffff; font-weight: bold;">require</span> '<span style="color: #ff00ff;">org-octopress</span>)
-(setq org-octopress-directory-top       <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source/org_pos/source"</span>)
-(setq org-octopress-directory-posts     <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source/_posts"</span>)
-(setq org-octopress-directory-org-top   <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source"</span>)
-(setq org-octopress-directory-org-posts <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source/blog"</span>)
-<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">&#38656;&#35201;&#25335;&#36125;https:////github.com/yoshinari-nomura/org-octopress &#30340;setupfile-sample.org &#21040;&#19979;&#38754;&#30340;&#30446;&#24405;</span>
-<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">&#24182;&#19988;&#38656;&#35201;&#26356;&#25442;&#21517;&#23383;</span>
-(setq org-octopress-setup-file          <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org"</span>)
+<span style="color: #00ff00; font-style: italic;">;;; </span><span style="color: #00ff00; font-style: italic;">org octopress</span>
+<span style="color: #00ff00; font-style: italic;">;;; </span><span style="color: #00ff00; font-style: italic;">&#27880;&#24847;&#23558;optopress&#36335;&#24452;&#38656;&#35201;&#26367;&#25442;&#25104;&#20320;&#30340;optopress&#36335;&#24452;</span>
+(<span style="color: #00ff00;">require</span> '<span style="color: #00ffff;">org-octopress</span>)
+(setq org-octopress-directory-top       <span style="color: #00ffff;">"~/CodeRepo/GitRepo/octopress/source/org_pos/source"</span>)
+(setq org-octopress-directory-posts     <span style="color: #00ffff;">"~/CodeRepo/GitRepo/octopress/source/_posts"</span>)
+(setq org-octopress-directory-org-top   <span style="color: #00ffff;">"~/CodeRepo/GitRepo/octopress/source"</span>)
+(setq org-octopress-directory-org-posts <span style="color: #00ffff;">"~/CodeRepo/GitRepo/octopress/source/blog"</span>)
+<span style="color: #00ff00; font-style: italic;">;;; </span><span style="color: #00ff00; font-style: italic;">&#38656;&#35201;&#25335;&#36125;https:////github.com/yoshinari-nomura/org-octopress &#30340;setupfile-sample.org &#21040;&#19979;&#38754;&#30340;&#30446;&#24405;</span>
+<span style="color: #00ff00; font-style: italic;">;;; </span><span style="color: #00ff00; font-style: italic;">&#24182;&#19988;&#38656;&#35201;&#26356;&#25442;&#21517;&#23383;</span>
+(setq org-octopress-setup-file          <span style="color: #00ffff;">"~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org"</span>)
 
-(<span style="color: #00ffff; font-weight: bold;">provide</span> '<span style="color: #ff00ff;">init-local</span>)
+(<span style="color: #00ff00;">provide</span> '<span style="color: #00ffff;">init-local</span>)
 </pre>
 </div>
 
