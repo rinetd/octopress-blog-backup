@@ -1,0 +1,18 @@
+#+TITLE: go语言并发模型
+#+DATE: 2014-04-25
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: Go
+#+JEKYLL_PUBLISHED: false
+#+JEKYLL_COMMENTS: true
+
+* GO 语言并发模型
+
+** 哲学
+#+BEGIN_QUOTE
+不要通过共享内存来通信， 应该通过通信来共享内存
+#+END_QUOTE
+
+
+
+{{{more}}}

@@ -12,6 +12,11 @@
 替换单词 *M-%* 询问是否替换单词
 #+END_QUOTE
 
+* org mode 快捷键
+#+BEGIN_QUOTE
+C-u C-c C-! 生成当前时间
+#+END_QUOTE
+
 * 必用插件
 #+BEGIN_QUOTE
 org: org-mode, 非常方便的记笔记工具。
