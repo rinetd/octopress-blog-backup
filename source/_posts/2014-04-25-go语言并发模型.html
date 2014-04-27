@@ -1,12 +1,12 @@
 ---
-title: "[PREVIEW] go语言并发模型"
+title: "go语言并发模型"
 date: 2014-04-25
 layout: post
 categories: Go
-published: false
+published: true
 comments: true
 ---
-<span style="background: red;">PREVIEW</span>
+
 <div id="outline-container-sec-1" class="outline-2">
 <h2 id="sec-1">GO 语言并发模型</h2>
 <div class="outline-text-2" id="text-1">
@@ -18,8 +18,196 @@ comments: true
 不要通过共享内存来通信， 应该通过通信来共享内存
 </p>
 </blockquote>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">进程、线程、协程</h3>
+<div class="outline-text-3" id="text-1-2">
+</div><div id="outline-container-sec-1-2-1" class="outline-4">
+<h4 id="sec-1-2-1">进程</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<blockquote>
+<ol class="org-ol">
+<li>操作系统中最核心的概念是进程。
+</li>
+<li>进程是“程序执行的一个实例” ，担当分配系统资源的实体。
+</li>
+<li>进程创建必须分配一个完整的独立地址空间。
+</li>
+<li>让计算机能够同时处理多个任务，操作系统有了进程的概念，
+而且在进程内部，基本可以认为当前系统只有一个进程在运行，
+操作系统对此作了非常好的封装。进程间的切换是有操作系统来完成的。
+</li>
+</ol>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2-2" class="outline-4">
+<h4 id="sec-1-2-2">线程</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<blockquote>
+<p>
+线程是进程的一个执行流，独立执行它自己的程序代码。
+线程是操作系统能够进行运算调度的最小单位。
+</p>
+
+<p>
+线程的问题是：<br  />
+1）存在线程安全问题，出了问题非常不易定位。<br  />
+2）进程内部有线程数目的限制。<br  />
+3）随着并发量的增加，线程生成和切换的成本也变得昂贵。<br  />
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2-3" class="outline-4">
+<h4 id="sec-1-2-3">协程</h4>
+<div class="outline-text-4" id="text-1-2-3">
+<blockquote>
+<ol class="org-ol">
+<li>协程不同于线程的地方在于协程不是操作系统进行切换，
+而是由程序员编码进行切换的，也就是说切换是由程序员控制的，
+这样就没有了线程所谓的安全问题。
+</li>
+
+<li>所有的协程都共享整个进程的上下文，这样协程间的交换也非
+常方便。
+</li>
+</ol>
+
+<p>
+缺点：协程的缺点可能是无法利用多核优势。
+</p>
+
+<p>
+简而言之：编程语言提供的一种并发机制，不受操作系统的调度，由
+程序员来控制。
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">并发编程难度</h3>
+<div class="outline-text-3" id="text-1-3">
+<blockquote>
+<p>
+并发编程的难度在于协调，而协调就要通过通信。<br  />
+并发通信模型： 共享数据和消息。<br  />
+</p>
+
+<p>
+基于内存的消息通信缺点：<br  />
+我们还能用多线程干活，只是因为我们手里还有加锁机制，<br  />
+而它可以部分地堵上线程模型的漏洞。讽刺的是，<br  />
+引入加锁机制解决问题的同时，又带来了新的问题，<br  />
+所以我们编写多线程程序总会遇上死锁，活锁，优先级反转……等等。<br  />
+</p>
+
+<p>
+基于消息共享内存的优点：
+</p>
+<ol class="org-ol">
+<li>抹去共享变量。（解决资源竞争问题）
+</li>
+<li>异步传递消息。
+</li>
+<li>可控制。
+</li>
+</ol>
+
+<p>
+个人理解：
+基于内存的消息通信最大的缺点就是程序员不可控制，它是由
+操作系统控制的，而基于消息的并发模型是程序员可以控制的。
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">go语言并发编程</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+<b>goroutine</b> 是协程的实现，由Go runtime管理，使用只需要<br  />
+<b>go</b> 关键字开启。
+</p>
+
+<p>
+<b>channel</b> 是goroutine间的传递消息的通道。（类似Unix中的管道）
+</p>
+<blockquote>
+<p>
+通道是协程之间的数据传输通道。通道可以在众多的协程之间传递数据，<br  />
+具体可以值也可以是个引用。通道有两种使用方式。<br  />
+ ·  协程可以试图向通道放入数据，如果通道满了，会挂起协程，<br  />
+    直到通道可以为他放入数据为止。<br  />
+ ·  协程可以试图向通道索取数据，如果通道没有数据，会挂起协程，<br  />
+    直到通道返回数据为止。<br  />
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5">使用</h3>
+<div class="outline-text-3" id="text-1-5">
+<div class="org-src-container">
+
+<pre class="src src-go"><span style="color: #00ffff; font-weight: bold;">package</span> main
+
+<span style="color: #00ffff; font-weight: bold;">import</span> <span style="color: #00ff00;">"fmt"</span>
+
+<span style="color: #00ffff; font-weight: bold;">func</span> <span style="color: #0000ff; font-weight: bold;">Add</span>(ch <span style="color: #00ffff; font-weight: bold;">chan</span> <span style="color: #00ff00;">int</span>, x, y int) {
+        z := x + y
+        <span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#24448;channel&#20013;&#20889;&#25968;&#25454;</span>
+        ch &lt;- z
+}
+
+<span style="color: #00ffff; font-weight: bold;">func</span> <span style="color: #0000ff; font-weight: bold;">main</span>() {
+        <span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#23450;&#20041;10&#20010;channel</span>
+        chs := <span style="color: #0000ff; font-weight: bold;">make</span>([]<span style="color: #00ffff; font-weight: bold;">chan</span> <span style="color: #00ff00;">int</span>, 10)
+
+        <span style="color: #00ffff; font-weight: bold;">for</span> i := 0; i &lt; 10; i++ {
+                chs[i] = <span style="color: #0000ff; font-weight: bold;">make</span>(<span style="color: #00ffff; font-weight: bold;">chan</span> <span style="color: #00ff00;">int</span>)
+                <span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#20351;&#29992;goroutine</span>
+                <span style="color: #00ffff; font-weight: bold;">go</span> <span style="color: #0000ff; font-weight: bold;">Add</span>(chs[i], i, 1)
+        }
+
+        <span style="color: #00ffff; font-weight: bold;">for</span> i, ch := <span style="color: #00ffff; font-weight: bold;">range</span> chs {
+                fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(<span style="color: #00ff00;">"chan index"</span>, i)
+                <span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#35835;channel&#20013;&#30340;&#25968;&#25454;</span>
+                value := &lt;-ch
+                fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(<span style="color: #00ff00;">"value"</span>, value)
+        }
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6" class="outline-3">
+<h3 id="sec-1-6">总结</h3>
+<div class="outline-text-3" id="text-1-6">
+</div><ul class="org-ul"><li>Golang的并发模型是基于消息来共享内存，这种模型的好处就是程序员可以控制并发。<br  /></li></ul>
+</div>
 
 
+<div id="outline-container-sec-1-7" class="outline-3">
+<h3 id="sec-1-7">参考</h3>
+<div class="outline-text-3" id="text-1-7">
+<blockquote>
+<p>
+<a href="http://www.cnblogs.com/shenguanpu/archive/2013/05/05/3060616.html">http://www.cnblogs.com/shenguanpu/archive/2013/05/05/3060616.html</a> <br  />
+<a href="http://www.cnblogs.com/chgaowei/archive/2012/06/21/2557175.html">http://www.cnblogs.com/chgaowei/archive/2012/06/21/2557175.html</a><br  />
+《Go语言编程》 许式伟 吕桂华<br  />
+<a href="http://qing.blog.sina.com.cn/tj/88ca09aa33002ele.html">http://qing.blog.sina.com.cn/tj/88ca09aa33002ele.html</a><br  />
+</p>
+</blockquote>
 
 <p>
 <!-- more -->
