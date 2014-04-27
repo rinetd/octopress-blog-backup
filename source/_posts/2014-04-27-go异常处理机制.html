@@ -1,0 +1,45 @@
+---
+title: "[PREVIEW] Go异常处理机制"
+date: 2014-04-27
+layout: post
+categories: Go
+published: false
+comments: true
+---
+<span style="background: red;">PREVIEW</span>
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Go异常处理机制</h2>
+<div class="outline-text-2" id="text-1">
+<p class="verse">
+Go 没有像Java那样的异常机制,例如你无法像在Java中那样抛出一个异常。<br  />
+作为替代,它使用了恐慌和恢复(panic-and-recover)机制。一定要记得,<br  />
+这应当作为最后的手段被使用,你的代码中应当没有,或者很少的令人恐慌的东西。<br  />
+</p>
+</div>
+
+<div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">错误处理defer</h3>
+<div class="outline-text-3" id="text-1-1">
+<p class="verse">
+defer 函数在函数运行结束后运行，遵循（LIFO）原则。<br  />
+一个函数内可以有多个defer函数，第一个被定义的函数最后执行。<br  />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">总结</h3>
+<div class="outline-text-3" id="text-1-2">
+<ol class="org-ol">
+<li>Golang 哲学是显式的检查错误并且把错误返回。
+</li>
+<li>Panic／Recover 最好不要出现在代码中。
+</li>
+</ol>
+
+<p>
+<!-- more -->
+</p>
+</div>
+</div>
+</div>

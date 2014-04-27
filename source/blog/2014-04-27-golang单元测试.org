@@ -1,0 +1,108 @@
+#+TITLE: Golang单元测试
+#+DATE: 2014-04-27
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: Go
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* Golang 单元测试
+
+** 哲学
+#+BEGIN_QUOTE
+测试只能证明你的代码有问题，不能证明你的代码没有问题。
+#+END_QUOTE
+
+** 测似的粒度
+#+BEGIN_VERSE
+老板为我的代码付报酬，而不是测试，所以，我对此的价值观是——测试越少越好，
+少到你对你的代码质量达到了某种自信（我觉得这种的自信标准应该要高于业内的
+标准，当然，这种自信也可能是种自大）。如果我的编码生涯中不会犯这种典型的
+错误（如：在构造函数中设了个错误的值），那我就不会测试它。我倾向于去对
+那些有意义的错误做测试，所以，我对一些比较复杂的条件逻辑会异常地小心。
+当在一个团队中，我会非常小心的测试那些会让团队容易出错的代码。
+
+个人理解：测试需要测有意义的东西，而不是盲目的100%覆盖，需要的是恰到好处
+的UT。
+#+END_VERSE
+
+** TDD(测试驱动开发)
+#+BEGIN_VERSE
+个人理解：
+1. 测试不能帮助你写出优秀的设计，只能保证你写的代码不出错。
+2. 软件开发是一种发现问题解决问题的过程，TDD并不能达到这样
+   的效果。
+3. TDD保证代码正确，但是什么来保证TDD的case是正确的。
+4. TDD的好处大多是理论上的，实际上是不是只有做过才知道。
+5. 决定软件工艺的还是设计，程序员需要知道怎么思考，怎么设计，
+   怎么测试，而不是教条主义的照搬某某理论，某某Best Practice。
+6. 软件工程是没有银弹的，TDD也许适合你的项目，你的编程风格，
+   但是不一定适合所有人。
+
+总结： 软件需要的是恰到好处的设计和单元测试。
+#+END_VERSE
+
+** Go语言中的单元测试
+go语言自带 *testing* 测试框架， *go test* 命令可以运行单元测试和性能测试。\\
+
+*** 使用
+** exa.go 文件
+#+BEGIN_SRC go
+package main
+
+import "fmt"
+
+func Add(x, y int) int {
+        return x + y
+}
+
+func main() {
+        x, y := 1, 2
+        fmt.Println(Add(x, y))
+}
+#+END_SRC
+
+** exa_test.go 测试文件
+#+BEGIN_SRC go
+package main
+
+import (
+        "testing"
+)
+
+func TestAdd(t *testing.T) {
+        if x := Add(1, 3); x != 4 {
+                t.Error("error in test Add")
+        }
+        if x := Add(1, 3); x != 5 {
+                t.Error("error in test Add 5")
+        }
+}
+#+END_SRC
+
+#+BEGIN_SRC sh
+# 在当前文件夹运行go test便可以运行测试
+go test
+#+END_SRC
+
+** 使用原则
+#+BEGIN_VERSE
+1. 文件名必须是_test.go结尾的，这样在执行go test的时候才会执行到相应的代码
+2. 你必须import testing这个包
+3. 所有的测试用例函数必须是Test开头
+4. 测试用例会按照源代码中写的顺序依次执行
+5. 测试函数TestXxx()的参数是testing.T，我们可以使用该类型来记录错误或者是
+   测试状态
+6. 测试格式：func TestXxx (t *testing.T),Xxx部分可以为任意的字母数字的组合，
+   但是首字母不能是小写字母[a-z]，例如Testintdiv是错误的函数名。
+7. 函数中通过调用testing.T的Error, Errorf, FailNow, Fatal, FatalIf方法，
+   说明测试不通过，调用Log方法用来记录测试的信息。
+#+END_VERSE
+
+
+** 参考
+#+BEGIN_VERSE
+http://coolshell.cn/articles/8209.html
+https://github.com/astaxie/build-web-application-with-golang/blob/master/ebook/11.3.md
+#+END_VERSE
+{{{more}}}
