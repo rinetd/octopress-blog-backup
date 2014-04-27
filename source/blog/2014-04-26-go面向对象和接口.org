@@ -1,0 +1,214 @@
+#+TITLE: Golang面向对象编程
+#+DATE: 2014-04-26
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: Go
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+
+* GO 面向对象编程
+** 哲学
+#+BEGIN_QUOTE
+Less is more
+#+END_QUOTE
+
+** 区别
+与Java、C++、Python等面向对象语言的区别
+1. 没有传统OOP编程中继承、虚函数、构造函数和析构函数、隐藏的this指针等概念。
+2. 接口无需申明（静态类型的duck typing）。
+3. 无侵式实现接口，接口与实现分离。
+
+** 接口
+*** 解释
+  接口就是一个协议，规定了一组成员。
+
+** 语法
+*** 类
+#+BEGIN_SRC go
+/* 定义一个形状类
+   实现正方形计算面积的方法
+   实现圆计算面积的方法
+*/
+type Sharp struct {
+    r float64
+}
+
+func (s Sharp) Square() float64{
+    return s.r * s.r
+}
+
+func (s Sharp) Circle() float64{
+    return s.r * s.r * 3.14
+}
+#+END_SRC
+
+*** 接口
+#+BEGIN_SRC go
+type Area interface {
+    Square() float64
+    Circle() float64
+}
+/* 上面类的例子没有继承接口，但是实现了接口的方法，接口无需继承 */
+/* 使用 */
+var sharp Area = &sharp{4}
+sharp.Square()
+sharp.Circle()
+#+END_SRC
+
+*** 完整代码
+#+BEGIN_SRC go
+package main
+
+import "fmt"
+
+/* 定义一个形状类
+   实现正方形计算面积的方法
+   实现圆计算面积的方法
+*/
+type Sharp struct {
+        r float64
+}
+
+func (s Sharp) Square() float64 {
+        return s.r * s.r
+}
+
+func (s Sharp) Circle() float64 {
+        return s.r * s.r * 3.14
+}
+
+type Area interface {
+        Square() float64
+        Circle() float64
+}
+
+func main() {
+        // 实例化类方法, 引用
+        var sharpSquare Sharp = Sharp{4}
+        var sharpCircle Sharp = Sharp{4}
+
+        // 实例化类方法，指针
+        var sharpSquare1 *Sharp = &Sharp{4}
+        var sharpCircle1 *Sharp = &Sharp{4}
+
+        // 实例化类方法, 使用new关键字
+        // new 分配了0值填充的Sharp类型的内存空间，并且返回该空间的地址
+        sharpSquare2 := new(Sharp)
+        sharpSquare2.r = 5
+
+        fmt.Println("引用")
+        fmt.Println(sharpSquare.Square())
+        fmt.Println(sharpCircle.Circle())
+
+        fmt.Println("指针")
+        fmt.Println(sharpSquare1.Square())
+        fmt.Println(sharpCircle1.Circle())
+
+        fmt.Println("new关键字")
+        fmt.Println(sharpSquare2.Circle())
+
+        // Sharp 实现了接口的两个方法，已经实现了该接口
+        // 接口调用
+        fmt.Println("接口")
+        var area1 Area = Sharp{6}
+        fmt.Println(area1.Square())
+        fmt.Println(area1.Circle())
+}
+#+END_SRC
+
+*** 多态
+#+BEGIN_SRC go
+package main
+
+import (
+        "fmt"
+)
+/*
+    定义Square和Circle两个类
+    分别实现Area方法
+    定义接口PolySharp，接口方法Area
+    Square和Circle相当于实现了接口PolySharp
+*/
+type Square struct {
+        width float64
+}
+
+type Circle struct {
+        redius float64
+}
+
+func (s Square) Area() float64 {
+        return s.width * s.width
+}
+
+func (s Circle) Area() float64 {
+        return s.redius * s.redius * 3.14
+}
+
+type PolySharp interface {
+        Area() float64
+}
+
+func main() {
+        var s1 PolySharp = &Square{4}
+        var s2 PolySharp = &Circle{4}
+        fmt.Println(s1.Area())
+        fmt.Println(s2.Area())
+}
+#+END_SRC
+
+** 杂项
+*** 函数定义文法
+#+BEGIN_SRC go
+type mytype int
+func (p mytype) funcname(i int) (r int) {
+    return 0
+}
+
+// 关键字func， 绑定到mytype上（叫做方法method）， 函数名， 返回类型
+#+END_SRC
+
+*** 指针：Go语言的指针，基本上只剩下用于区分 byref 和 byval 语义。
+#+BEGIN_SRC go
+package main
+
+import "fmt"
+
+func byref(a int) {
+    a += 5
+    fmt.Println(a)
+}
+
+func byval(a *int) {
+    fmt.Println(a)
+    *a += 5
+    fmt.Println(a)
+}
+
+func main() {
+    a := 4;
+    fmt.Println(a)
+    byref(a)
+    fmt.Println(a)
+    byval(&a)
+    fmt.Println(a)
+}
+
+/* result
+4
+9
+4
+9
+9
+*/
+#+END_SRC
+
+** 总结
+1. 无侵入式的接口设计确实很新颖和优雅，仔细读代码\\
+简单明了。
+2. golang使用组合替代继承，符合OOP的设计原则。
+3. OOP的消息传递机制更直接。
+
+
+{{{more}}}
