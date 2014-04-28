@@ -170,17 +170,18 @@ func (p mytype) funcname(i int) (r int) {
 #+END_SRC
 
 *** 指针：Go语言的指针，基本上只剩下用于区分 byref 和 byval 语义。
+解释： 值类型保存的是具体的值 引用类型保存的是值的地址。\\
 #+BEGIN_SRC go
 package main
 
 import "fmt"
 
-func byref(a int) {
+func byval(a int) {
     a += 5
     fmt.Println(a)
 }
 
-func byval(a *int) {
+func byref(a *int) {
     fmt.Println(a)
     *a += 5
     fmt.Println(a)
@@ -189,9 +190,9 @@ func byval(a *int) {
 func main() {
     a := 4;
     fmt.Println(a)
-    byref(a)
+    byval(a)
     fmt.Println(a)
-    byval(&a)
+    byref(&a)
     fmt.Println(a)
 }
 
@@ -205,8 +206,7 @@ func main() {
 #+END_SRC
 
 ** 总结
-1. 无侵入式的接口设计确实很新颖和优雅，仔细读代码\\
-简单明了。
+1. 无侵入式的接口设计确实很新颖和优雅，仔细读代码简单明了。
 2. golang使用组合替代继承，符合OOP的设计原则。
 3. OOP的消息传递机制更直接。
 

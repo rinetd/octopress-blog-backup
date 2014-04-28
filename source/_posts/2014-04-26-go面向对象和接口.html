@@ -236,18 +236,21 @@ sharp.<span style="color: #0000ff; font-weight: bold;">Circle</span>()
 <div id="outline-container-sec-1-5-2" class="outline-4">
 <h4 id="sec-1-5-2">指针：Go语言的指针，基本上只剩下用于区分 byref 和 byval 语义。</h4>
 <div class="outline-text-4" id="text-1-5-2">
+<p>
+解释： 值类型保存的是具体的值 引用类型保存的是值的地址。<br  />
+</p>
 <div class="org-src-container">
 
 <pre class="src src-go"><span style="color: #00ffff; font-weight: bold;">package</span> main
 
 <span style="color: #00ffff; font-weight: bold;">import</span> <span style="color: #00ff00;">"fmt"</span>
 
-<span style="color: #00ffff; font-weight: bold;">func</span> <span style="color: #0000ff; font-weight: bold;">byref</span>(a int) {
+<span style="color: #00ffff; font-weight: bold;">func</span> <span style="color: #0000ff; font-weight: bold;">byval</span>(a int) {
     a += 5
     fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(a)
 }
 
-<span style="color: #00ffff; font-weight: bold;">func</span> <span style="color: #0000ff; font-weight: bold;">byval</span>(a *int) {
+<span style="color: #00ffff; font-weight: bold;">func</span> <span style="color: #0000ff; font-weight: bold;">byref</span>(a *int) {
     fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(a)
     *a += 5
     fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(a)
@@ -256,9 +259,9 @@ sharp.<span style="color: #0000ff; font-weight: bold;">Circle</span>()
 <span style="color: #00ffff; font-weight: bold;">func</span> <span style="color: #0000ff; font-weight: bold;">main</span>() {
     a := 4;
     fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(a)
-    <span style="color: #0000ff; font-weight: bold;">byref</span>(a)
+    <span style="color: #0000ff; font-weight: bold;">byval</span>(a)
     fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(a)
-    <span style="color: #0000ff; font-weight: bold;">byval</span>(&amp;a)
+    <span style="color: #0000ff; font-weight: bold;">byref</span>(&amp;a)
     fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(a)
 }
 
@@ -279,13 +282,8 @@ sharp.<span style="color: #0000ff; font-weight: bold;">Circle</span>()
 <h3 id="sec-1-6">总结</h3>
 <div class="outline-text-3" id="text-1-6">
 <ol class="org-ol">
-<li>无侵入式的接口设计确实很新颖和优雅，仔细读代码<br  />
+<li>无侵入式的接口设计确实很新颖和优雅，仔细读代码简单明了。
 </li>
-</ol>
-<p>
-简单明了。
-</p>
-<ol class="org-ol">
 <li>golang使用组合替代继承，符合OOP的设计原则。
 </li>
 <li>OOP的消息传递机制更直接。
