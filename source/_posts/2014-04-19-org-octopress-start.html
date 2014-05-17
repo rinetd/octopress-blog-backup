@@ -2,7 +2,246 @@
 title: "octopress+org-mode写博客"
 date: 2014-04-19
 layout: post
-categories: [emacs, org-mode, octopress]
+categories: 
 published: true
 comments: true
 ---
+
+
+<ul class="org-ul"><li>主要内容<br  /><div class="outline-text-5" id="text-0-0-0-1">
+<ol class="org-ol">
+<li>安装octopress
+<ul class="org-ul">
+<li>什么是octopress
+</li>
+<li>基本安装
+</li>
+<li>配置
+</li>
+</ul>
+</li>
+<li>使用org-mode写博客
+<ul class="org-ul">
+<li>什么是org-mode
+</li>
+<li>安装emacs24
+</li>
+<li>使用高手配置
+</li>
+<li>配置org-mode来写博客
+</li>
+</ul>
+</li>
+<li>总结
+</li>
+</ol>
+</div>
+</li>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">1 安装octopress</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">什么是octopress</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+octopress 是一个静态blog，使用markdown语言来写文章，可以部署在github page上，<br  />
+有非常漂亮的代码高亮插件，blog for hacker是他的哲学，简单、实用、COOL.<br  />
+</p>
+</div>
+</div>
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">基本安装</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+主要参考 <a href="http://octopress.org/docs/setup/">官网文档</a>, 写的比较好的 <a href="http://blog.segmentfault.com/yaashion_xiang/1190000000364677">中文文档</a> ，安装比较简单，<br  />
+    跟着教程走基本都能成功。<br  />
+</p>
+</div>
+</div>
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">配置:</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+    评论配置使用 <b>Disqus</b>, 需要到 <i><a href="http://disqus.com/admin/signup/?utm_source=new-site">http://disqus.com/admin/signup/?utm_source=new-site</a></i> 注册，
+注册完成后需要到admin的settings里添加相应的sitename和siteurl. <br  />
+然后修改 octopress里的 <b>_config.yaml文件</b> <br  />
+</p>
+<div class="org-src-container">
+
+<pre class="src src-yaml"><span style="color: #ff0000;">#</span><span style="color: #ff0000;">disqus comments</span>
+<span style="color: #ffff00;">disqus_short_name</span>: your disqus name
+<span style="color: #ffff00;">disqus_show_comment_count</span>: <span style="color: #ff00ff;">true</span>
+</pre>
+</div>
+
+<p>
+配置成功后，运行<br  />
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">rake generic
+rake preview
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#22312;&#27983;&#35272;&#22120;&#20013;&#36755;&#20837;127.0.0.1:4000&#39044;&#35272;</span>
+</pre>
+</div>
+
+<p>
+预览没有问题就可以使用：<br  />
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">rake deploy <span style="color: #ff0000;">#</span><span style="color: #ff0000;">&#19978;&#20256;&#21040;github page&#65292;&#22312;&#27983;&#35272;&#22120;&#36755;&#20837;&#30456;&#24212;&#30340;&#22320;&#22336;&#20415;&#21487;&#20197;&#26597;&#30475;&#65292;&#21487;&#33021;&#20250;&#26377;&#25152;&#24310;&#26102;</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">2. 使用org-mode来写博客</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1">什么是org-mode</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+org-mode 的哲学是organize your life in plaintext，是emacs中的一个模式，<br  />
+你可以用它做gtd 、todo、project plan 、文学编程，类似wytwyg（所想即所得），<br  />
+可以将文章导出为html、pdf等文件，还可以与版本控制结合起来，在emacs下可以<br  />
+有很多hack的功能。<br  />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2">安装emacs24</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+mac使用brew可以直接安装：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">brew install emacs
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3">配置emacs</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+直接使用大师purcell的配置<a href="https://github.com/purcell/emacs.d">https://github.com/purcell/emacs.d</a><br  />
+按照上面的教程完成基本配置之后，需要到 <b>~/.emacs.d/lisp/</b> 下建立 <b>init-local.el</b>, <br  />
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">touch ~/.emacs.d/lisp/init-local.el
+</pre>
+</div>
+<p>
+自己的配置都写到这个文件里。<br  />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4">配置使用org-mode 来写octopress</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+插件<a href="https://github.com/yoshinari-nomura/org-octopress">地址</a> 有详细文档 <br  />
+</p>
+
+<p>
+打开emacs，按 <i>M-x</i> 输入命令 <i>desktop-clear</i> 清除emacs的sessions ，<br  />
+按 <i>m-x</i> 输入 <i>package-list-packages</i> 然后enter，<br  />
+通过C-s查找org和org-octopress, 紧接着用i标记安装，然后按x执行安装。<br  />
+</p>
+
+<p>
+安装结束后重启emacs， 在init-local.el输入以下配置。<br  />
+</p>
+<div class="org-src-container">
+
+<pre class="src src-lisp">;;; org mode
+;;; &#25171;&#24320;&#21518;&#32512;&#21517;&#20026;org&#30340;&#25991;&#20214;&#26102;&#33258;&#21160;&#21551;&#29992;org mode
+(add-to-list 'auto-mode-alist '(<span style="color: #00ff00;">"\\.org\\'"</span> . org-mode))
+(global-font-lock-mode 1)
+
+;;; org octopress
+;;; &#27880;&#24847;&#23558;optopress&#36335;&#24452;&#38656;&#35201;&#26367;&#25442;&#25104;&#20320;&#30340;optopress&#36335;&#24452;
+(require 'org-octopress)
+(setq org-octopress-directory-top       <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source/org_pos/source"</span>)
+(setq org-octopress-directory-posts     <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source/_posts"</span>)
+(setq org-octopress-directory-org-top   <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source"</span>)
+(setq org-octopress-directory-org-posts <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source/blog"</span>)
+;;; &#38656;&#35201;&#25335;&#36125;https:////github.com/yoshinari-nomura/org-octopress &#30340;setupfile-sample.org &#21040;&#19979;&#38754;&#30340;&#30446;&#24405;
+;;; &#24182;&#19988;&#38656;&#35201;&#26356;&#25442;&#21517;&#23383;
+(setq org-octopress-setup-file          <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org"</span>)
+
+(provide 'init-local)
+</pre>
+</div>
+
+<p>
+修改 octopress 中的_config.yaml
+</p>
+<pre class="example">
+# 修改permalink 为如下
+permalink: /blog/:year-:month-:day-:title.html
+</pre>
+<p>
+使用<br  />
+</p>
+<blockquote>
+<ol class="org-ol">
+<li>打开emacs
+</li>
+<li>M-x org-octopress
+</li>
+<li>Compose YYYY-MM-DD-title.org in source/blog directory.
+</li>
+<li>C-c C-e (org-export-dispatch) and type “P” “x” “octopress”
+</li>
+
+<li>In command line terminal:
+</li>
+</ol>
+<p>
+rake preview
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">总结</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1">为什么我要使用emacs</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+VIM 我已经使用的很熟练了，但是它始终是编辑器之神，也就是编辑代码<br  />
+快一些而已， 除此之外在它上面已经找不到让人兴奋的感觉了， 而emacs的<br  />
+哲学是神的编辑器， 对于我来说它是一个操作系统， 你可以控制一切你想控制<br  />
+的东西， 可以使用elisp在上面hack， 让你更多的去思考， 而不仅仅是编辑。<br  />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2">octopress + emacs的org mode</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+这个模式是我在使用emacs中想出来的， 事实也证明了在emacs的世界里， 没有<br  />
+做不到的， 只有你想不到的， 以后我会通过这个模式记录学习的点点滴滴， 管理<br  />
+好自己的知识， 用emacs去做一些cool的事情。<br  />
+</p>
+
+<p>
+<!-- more -->
+</p>
+</div>
+</div>
+</div>
