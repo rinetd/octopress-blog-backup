@@ -1,0 +1,37 @@
+#+TITLE: Docker使用笔记
+#+DATE: 2014-05-01
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: Docker
+#+JEKYLL_PUBLISHED: false
+#+JEKYLL_COMMENTS: true
+
+* Docker使用笔记
+
+** 什么是Docker
+#+BEGIN_VERSE
+docker的英文本意是码头工人，也就是搬运工，这种搬运工搬运的是集装箱（Container），
+集装箱里面装的可不是商品货物，而是任意类型的App，Docker把App（叫Payload）装在Container内，
+通过Linux Container技术的包装将App变成一种标准化的、可移植的、自管理的组件，
+这种组件可以在你的latop上开发、调试、运行，最终非常方便和一致地运行在production环境下。
+#+END_VERSE
+
+** Docker的特点
+#+BEGIN_VERSE
+1. Docker提供了一种可移植的配置标准化机制，允许你一致性地在不同的机器上运行同一个Container；
+  而LXC本身可能因为不同机器的不同配置而无法方便地移植运行；
+2. Docker以App为中心，为应用的部署做了很多优化，而LXC的帮助脚本主要是聚焦于如何机器启动地更快和耗更少的内存；
+3. Docker为App提供了一种自动化构建机制（Dockerfile），包括打包，基础设施依赖管理和安装等等；
+4. Docker提供了一种类似git的Container版本化的机制，允许你对你创建过的容器进行版本管理，依靠这种机制，
+   你还可以下载别人创建的Container，甚至像git那样进行合并；
+5. Docker Container是可重用的，依赖于版本化机制，你很容易重用别人的Container（叫Image），作为基础版本进行扩展；
+6. Docker Container是可共享的，有点类似github一样，Docker有自己的INDEX，你可以创建自己的Docker用户并上传和下载Docker Image；
+7. Docker提供了很多的工具链，形成了一个生态系统；这些工具的目标是自动化、个性化和集成化，包括对PAAS平台的支持等；
+#+END_VERSE
+
+** 参考
+#+BEGIN_QUOTE
+http://tech.uc.cn/?p=2726
+#+END_QUOTE
+
+{{{more}}}
