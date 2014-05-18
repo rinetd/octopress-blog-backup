@@ -37,6 +37,7 @@ M-, 用来查看第三方库。\\
 ** 参考
 #+BEGIN_QUOTE
 https:////github.com/technomancy/leiningen
+http://clojure-doc.org/articles/tutorials/emacs.html
 #+END_QUOTE
 
 {{{more}}}
