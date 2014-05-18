@@ -9,11 +9,11 @@
 * Emacs 中使用Clojure Mode
 
 ** 基本配置
-兄弟，不要折腾了，直接照抄Emacs大师Steve Purcell的配置[[https://github.com/purcell/emacs.d]] \\
+兄弟，不要折腾了，直接照抄Emacs大师Steve Purcell的配置[[https:////github.com/purcell/emacs.d]] \\
 配置完之后Clojure－Mode已经配置好，附带一些其他的配置。
 
 ** 使用
-*** 安装leiningen [[https://github.com/technomancy/leiningen]]
+*** 安装leiningen [[https:////github.com/technomancy/leiningen]]
 leiningen 是一个Clojure的项目管理工具。
 
 *** 常用快捷键
@@ -36,7 +36,7 @@ M-, 用来查看第三方库。\\
 
 ** 参考
 #+BEGIN_QUOTE
-https://github.com/technomancy/leiningen
+https:////github.com/technomancy/leiningen
 #+END_QUOTE
 
 {{{more}}}
