@@ -1,0 +1,42 @@
+#+TITLE: Emacs clojure-mode使用
+#+DATE: 2014-05-18
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: [Clojure, Emacs]
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* Emacs 中使用Clojure Mode
+
+** 基本配置
+兄弟，不要折腾了，直接照抄Emacs大师Steve Purcell的配置[[https://github.com/purcell/emacs.d]] \\
+配置完之后Clojure－Mode已经配置好，附带一些其他的配置。
+
+** 使用
+*** 安装leiningen [[https://github.com/technomancy/leiningen]]
+leiningen 是一个Clojure的项目管理工具。
+
+*** 常用快捷键
+M-x cider-jack-in 打开一个repl 的session，你编写的Clojure代码之后会在这里运行。\\
+
+C-c C-k 编译Clojure代码，如果编译出错 C-c C-f来定位错误的地方然后修正。\\
+
+C-c C-, 可以用来运行测试文件，结果会输出到打开的repl session。\\
+
+C-c M-n 用来切换repl session的namespace， 如果你正在编写一个clojure文件，可以\\
+使用这个快捷键来一边开发，一边测试。\\
+
+C-c C-o 可以用来清初repl session的无用信息。\\
+
+C-c C-d 可以用来查看函数的doc。\\
+
+M-. 可以查看函数的源代码。\\
+
+M-, 用来查看第三方库。\\
+
+** 参考
+#+BEGIN_QUOTE
+https://github.com/technomancy/leiningen
+#+END_QUOTE
+
+{{{more}}}
