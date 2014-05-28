@@ -102,7 +102,7 @@ go test
 
 ** 参考
 #+BEGIN_VERSE
-http://coolshell.cn/articles/8209.html
-https://github.com/astaxie/build-web-application-with-golang/blob/master/ebook/11.3.md
+http:////coolshell.cn/articles/8209.html
+https:////github.com/astaxie/build-web-application-with-golang/blob/master/ebook/11.3.md
 #+END_VERSE
 {{{more}}}
