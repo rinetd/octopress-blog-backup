@@ -1,0 +1,111 @@
+#+TITLE: Golang实现简单HTTP服务器
+#+DATE: 2014-05-28
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: [Golang Http]
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* Golang实现简单HTTP服务器
+
+** 设计思想
+一图胜千言：\\
+[[./images/GoHttpServerDesign.png]]
+并发模型是，只要有client来访问就开一个goroutine去处理，goroutine之间\\
+不需要通信。\\
+
+** 实现的功能
++ 并发处理浏览器请求。
++ 日志模块。
++ 配置模块。
+
+** 代码结构
+#+BEGIN_SRC sh
+.
+├── README.md
+├── README.org
+├── deps                          # 安装第三方库脚本
+├── install                       # 编译脚本
+└── src                           # 源代码
+    ├── config                    # 配置模块
+    │   └── config.go
+    ├── github.com                # 第三方库
+    ├── gohttpserver              # main模块
+    │   └── gohttpserver.go
+    ├── logger                    # 日志模块
+    │   └── logger.go
+    ├── request                   # request 模块
+    │   ├── request.go
+    │   └── request_test.go
+    └── response                  # response 模块
+        ├── response.go
+        └── response_test.go.
+#+END_SRC
+
+** 关键代码
+#+BEGIN_SRC go
+// 处理client的goroutine
+func (ghs *GoHttpServer) handleClient(conn net.Conn) {
+        reqChans := request.RequestsChans(conn)
+        response.StartResponse(conn, reqChans)
+}
+
+// 服务器永远运行，只要有client就用goroutine去处理
+func (ghs *GoHttpServer) ServerForever() {
+        for {
+                conn, err := ghs.listener.AcceptTCP()
+                if err != nil {
+                        logger.Logger.Warning(
+                                "Accept Client connection error, error msg %s",
+                                err.Error(),
+                        )
+                        continue
+                }
+                timeout := time.Second * time.Duration(config.SerConfig.Timeout)
+                conn.SetDeadline(time.Now().Add(timeout))
+                go ghs.handleClient(conn)
+        }
+}
+#+END_SRC
+
+** 遇到的问题
+*** 如何处理Http/1.1中的Keep-Alive?
+解决：使用channel来当作request队列，response模块从队列读取request信息返回。
+#+BEGIN_SRC go
+// return http request channels
+func RequestsChans(conn net.Conn) chan *Request {
+        reader := bufio.NewReader(conn)
+        reqCap := config.SerConfig.ReqChanCap
+        reqChans := make(chan *Request, reqCap)
+
+        go func() {
+                reqSlice := make([]string, reqCap)
+                for {
+                        line, err := reader.ReadString('\n')
+                        if err == nil {
+                                line = strings.TrimSpace(line)
+                                reqSlice = append(reqSlice, line)
+                                if len(line) == 0 {
+                                        req := parseRequest(reqSlice)
+                                        loggerReqInfo(conn, req)
+                                        reqChans <- req
+                                        reqSlice = reqSlice[:0]
+                                }
+                        } else {
+                                logger.Logger.Debug(
+                                        "Ip %s connection close, close msg %s",
+                                        conn.RemoteAddr().String(),
+                                        err.Error(),
+                                )
+                                conn.Close()
+                                break
+                        }
+                }
+                close(reqChans)
+        }()
+        return reqChans
+}
+#+END_SRC
+
+完整代码请参照https:////bitbucket.org/runforever/gohttpserver/overview
+{{{more}}}

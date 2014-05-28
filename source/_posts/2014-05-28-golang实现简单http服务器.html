@@ -1,0 +1,154 @@
+---
+title: "Golang实现简单HTTP服务器"
+date: 2014-05-28
+layout: post
+categories: [Golang Http]
+published: true
+comments: true
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Golang实现简单HTTP服务器</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">设计思想</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+一图胜千言：<br  />
+<img src="./images/GoHttpServerDesign.png" alt="GoHttpServerDesign.png" />
+并发模型是，只要有client来访问就开一个goroutine去处理，goroutine之间<br  />
+不需要通信。<br  />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">实现的功能</h3>
+<div class="outline-text-3" id="text-1-2">
+<ul class="org-ul">
+<li>并发处理浏览器请求。
+</li>
+<li>日志模块。
+</li>
+<li>配置模块。
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">代码结构</h3>
+<div class="outline-text-3" id="text-1-3">
+<div class="org-src-container">
+
+<pre class="src src-sh">.
+&#9500;&#9472;&#9472; README.md
+&#9500;&#9472;&#9472; README.org
+&#9500;&#9472;&#9472; deps                          <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#23433;&#35013;&#31532;&#19977;&#26041;&#24211;&#33050;&#26412;</span>
+&#9500;&#9472;&#9472; install                       <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#32534;&#35793;&#33050;&#26412;</span>
+&#9492;&#9472;&#9472; src                           <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#28304;&#20195;&#30721;</span>
+    &#9500;&#9472;&#9472; config                    <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#37197;&#32622;&#27169;&#22359;</span>
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; config.go
+    &#9500;&#9472;&#9472; github.com                <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#31532;&#19977;&#26041;&#24211;</span>
+    &#9500;&#9472;&#9472; gohttpserver              <span style="color: #ff0000;"># </span><span style="color: #ff0000;">main&#27169;&#22359;</span>
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; gohttpserver.go
+    &#9500;&#9472;&#9472; logger                    <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#26085;&#24535;&#27169;&#22359;</span>
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; logger.go
+    &#9500;&#9472;&#9472; request                   <span style="color: #ff0000;"># </span><span style="color: #ff0000;">request &#27169;&#22359;</span>
+    &#9474;&#160;&#160; &#9500;&#9472;&#9472; request.go
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; request_test.go
+    &#9492;&#9472;&#9472; response                  <span style="color: #ff0000;"># </span><span style="color: #ff0000;">response &#27169;&#22359;</span>
+        &#9500;&#9472;&#9472; response.go
+        &#9492;&#9472;&#9472; response_test.go.
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">关键代码</h3>
+<div class="outline-text-3" id="text-1-4">
+<div class="org-src-container">
+
+<pre class="src src-go"><span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#22788;&#29702;client&#30340;goroutine</span>
+<span style="color: #00ffff; font-weight: bold;">func</span> (ghs *<span style="color: #00ff00;">GoHttpServer</span>) <span style="color: #0000ff; font-weight: bold;">handleClient</span>(conn net.Conn) {
+        reqChans := request.<span style="color: #0000ff; font-weight: bold;">RequestsChans</span>(conn)
+        response.<span style="color: #0000ff; font-weight: bold;">StartResponse</span>(conn, reqChans)
+}
+
+<span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#26381;&#21153;&#22120;&#27704;&#36828;&#36816;&#34892;&#65292;&#21482;&#35201;&#26377;client&#23601;&#29992;goroutine&#21435;&#22788;&#29702;</span>
+<span style="color: #00ffff; font-weight: bold;">func</span> (ghs *<span style="color: #00ff00;">GoHttpServer</span>) <span style="color: #0000ff; font-weight: bold;">ServerForever</span>() {
+        <span style="color: #00ffff; font-weight: bold;">for</span> {
+                conn, err := ghs.listener.<span style="color: #0000ff; font-weight: bold;">AcceptTCP</span>()
+                <span style="color: #00ffff; font-weight: bold;">if</span> err != <span style="color: #ff00ff;">nil</span> {
+                        logger.Logger.<span style="color: #0000ff; font-weight: bold;">Warning</span>(
+                                <span style="color: #00ff00;">"Accept Client connection error, error msg %s"</span>,
+                                err.<span style="color: #0000ff; font-weight: bold;">Error</span>(),
+                        )
+                        <span style="color: #00ffff; font-weight: bold;">continue</span>
+                }
+                timeout := time.Second * time.<span style="color: #0000ff; font-weight: bold;">Duration</span>(config.SerConfig.Timeout)
+                conn.<span style="color: #0000ff; font-weight: bold;">SetDeadline</span>(time.<span style="color: #0000ff; font-weight: bold;">Now</span>().<span style="color: #0000ff; font-weight: bold;">Add</span>(timeout))
+                <span style="color: #00ffff; font-weight: bold;">go</span> ghs.<span style="color: #0000ff; font-weight: bold;">handleClient</span>(conn)
+        }
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5">遇到的问题</h3>
+<div class="outline-text-3" id="text-1-5">
+</div><div id="outline-container-sec-1-5-1" class="outline-4">
+<h4 id="sec-1-5-1">如何处理Http/1.1中的Keep-Alive?</h4>
+<div class="outline-text-4" id="text-1-5-1">
+<p>
+解决：使用channel来当作request队列，response模块从队列读取request信息返回。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-go"><span style="color: #ff0000;">// </span><span style="color: #ff0000;">return http request channels</span>
+<span style="color: #00ffff; font-weight: bold;">func</span> <span style="color: #0000ff; font-weight: bold;">RequestsChans</span>(conn net.Conn) <span style="color: #00ffff; font-weight: bold;">chan</span> *<span style="color: #00ff00;">Request</span> {
+        reader := bufio.<span style="color: #0000ff; font-weight: bold;">NewReader</span>(conn)
+        reqCap := config.SerConfig.ReqChanCap
+        reqChans := <span style="color: #0000ff; font-weight: bold;">make</span>(<span style="color: #00ffff; font-weight: bold;">chan</span> *<span style="color: #00ff00;">Request</span>, reqCap)
+
+        <span style="color: #00ffff; font-weight: bold;">go</span> <span style="color: #00ffff; font-weight: bold;">func</span>() {
+                reqSlice := <span style="color: #0000ff; font-weight: bold;">make</span>([]<span style="color: #00ff00;">string</span>, reqCap)
+                <span style="color: #00ffff; font-weight: bold;">for</span> {
+                        line, err := reader.<span style="color: #0000ff; font-weight: bold;">ReadString</span>(<span style="color: #00ff00;">'\n'</span>)
+                        <span style="color: #00ffff; font-weight: bold;">if</span> err == <span style="color: #ff00ff;">nil</span> {
+                                line = strings.<span style="color: #0000ff; font-weight: bold;">TrimSpace</span>(line)
+                                reqSlice = <span style="color: #0000ff; font-weight: bold;">append</span>(reqSlice, line)
+                                <span style="color: #00ffff; font-weight: bold;">if</span> <span style="color: #0000ff; font-weight: bold;">len</span>(line) == 0 {
+                                        req := <span style="color: #0000ff; font-weight: bold;">parseRequest</span>(reqSlice)
+                                        <span style="color: #0000ff; font-weight: bold;">loggerReqInfo</span>(conn, req)
+                                        reqChans &lt;- req
+                                        reqSlice = reqSlice[:0]
+                                }
+                        } <span style="color: #00ffff; font-weight: bold;">else</span> {
+                                logger.Logger.<span style="color: #0000ff; font-weight: bold;">Debug</span>(
+                                        <span style="color: #00ff00;">"Ip %s connection close, close msg %s"</span>,
+                                        conn.<span style="color: #0000ff; font-weight: bold;">RemoteAddr</span>().<span style="color: #0000ff; font-weight: bold;">String</span>(),
+                                        err.<span style="color: #0000ff; font-weight: bold;">Error</span>(),
+                                )
+                                conn.<span style="color: #0000ff; font-weight: bold;">Close</span>()
+                                <span style="color: #00ffff; font-weight: bold;">break</span>
+                        }
+                }
+                <span style="color: #0000ff; font-weight: bold;">close</span>(reqChans)
+        }()
+        <span style="color: #00ffff; font-weight: bold;">return</span> reqChans
+}
+</pre>
+</div>
+
+<p>
+完整代码请参照<a href="https://bitbucket.org/runforever/gohttpserver/overview">https://bitbucket.org/runforever/gohttpserver/overview</a>
+<!-- more -->
+</p>
+</div>
+</div>
+</div>
+</div>

@@ -1,4 +1,4 @@
-#+TITLE: Go反射机制
+#+TITLE: Go反射、接口
 #+DATE: 2014-04-29
 #+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
 #+JEKYLL_LAYOUT: post
@@ -10,5 +10,7 @@
 
 ** 反射的作用
 
+** 接口
+主要解决的问题是范型。
 
 {{{more}}}
