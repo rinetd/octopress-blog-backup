@@ -1,0 +1,30 @@
+#+TITLE: Clojure写DSL
+#+DATE: 2014-05-31
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: Clojure
+#+JEKYLL_PUBLISHED: false
+#+JEKYLL_COMMENTS: true
+
+* Clojure写DSL
+
+** 哲学
+#+BEGIN_QUOTE
+1. 没有银弹，函数式编程也只是一种编程范式。
+2. 函数式编程的范式是申明式编程，关注于描述问题是什么而不是怎么实现。
+3. 函数式编程本质并不是高深的S-expr，Macro，不可变状态之类的特性，而是描述要干什么，而不是怎么干。
+#+END_QUOTE
+
+** 什么是DSL
+DSL即领域编程语言，它是用于解决特定领域问题的语言。
+
+** 为什么可以用Lisp来写DSL
+学习中
+
+** 参考
+#+BEGIN_QUOTE
+http:////coolshell.cn/articles/10822.html \\
+http:////mzhou.me/article/95219/ \\
+#+END_QUOTE
+
+{{{more}}}

@@ -1,12 +1,12 @@
 ---
-title: "[PREVIEW] Docker使用笔记"
+title: "Docker使用笔记"
 date: 2014-05-01
 layout: post
 categories: Docker
-published: false
+published: true
 comments: true
 ---
-<span style="background: red;">PREVIEW</span>
+
 <div id="outline-container-sec-1" class="outline-2">
 <h2 id="sec-1">Docker使用笔记</h2>
 <div class="outline-text-2" id="text-1">
@@ -26,12 +26,10 @@ docker的英文本意是码头工人，也就是搬运工，这种搬运工搬�
 <h3 id="sec-1-2">Docker的特点</h3>
 <div class="outline-text-3" id="text-1-2">
 <p class="verse">
-1. Docker提供了一种可移植的配置标准化机制，允许你一致性地在不同的机器上运行同一个Container；<br  />
-&#xa0;&#xa0;而LXC本身可能因为不同机器的不同配置而无法方便地移植运行；<br  />
+1. Docker提供了一种可移植的配置标准化机制，允许你一致性地在不同的机器上运行同一个Container；而LXC本身可能因为不同机器的不同配置而无法方便地移植运行；<br  />
 2. Docker以App为中心，为应用的部署做了很多优化，而LXC的帮助脚本主要是聚焦于如何机器启动地更快和耗更少的内存；<br  />
 3. Docker为App提供了一种自动化构建机制（Dockerfile），包括打包，基础设施依赖管理和安装等等；<br  />
-4. Docker提供了一种类似git的Container版本化的机制，允许你对你创建过的容器进行版本管理，依靠这种机制，<br  />
-&#xa0;&#xa0;&#xa0;你还可以下载别人创建的Container，甚至像git那样进行合并；<br  />
+4. Docker提供了一种类似git的Container版本化的机制，允许你对你创建过的容器进行版本管理，依靠这种机制，你还可以下载别人创建的Container，甚至像git那样进行合并；<br  />
 5. Docker Container是可重用的，依赖于版本化机制，你很容易重用别人的Container（叫Image），作为基础版本进行扩展；<br  />
 6. Docker Container是可共享的，有点类似github一样，Docker有自己的INDEX，你可以创建自己的Docker用户并上传和下载Docker Image；<br  />
 7. Docker提供了很多的工具链，形成了一个生态系统；这些工具的目标是自动化、个性化和集成化，包括对PAAS平台的支持等；<br  />
@@ -40,11 +38,161 @@ docker的英文本意是码头工人，也就是搬运工，这种搬运工搬�
 </div>
 
 <div id="outline-container-sec-1-3" class="outline-3">
-<h3 id="sec-1-3">参考</h3>
+<h3 id="sec-1-3">为什么使用Docker</h3>
 <div class="outline-text-3" id="text-1-3">
+<p class="verse">
+1. 打包的开发环境，方便部署和迁移。<br  />
+2. 对于没有服务器的程序员可以用来模拟集群。<br  />
+3. 保持开发机器的干净整洁，将数据库、Web服务器这些东西放到Container里。<br  />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">Mac上使用Docker</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+方案有两种：
+</p>
+<ul class="org-ul">
+<li>使用Virtualbox + Boot2docker + 加宿主机器上（也就是Mac上）安装Docker。
+</li>
+<li>使用Virtualbox + Vagrant + CoreOS, 然后在CoreOS上使用Docker。
+</li>
+</ul>
+
+<p>
+个人倾向使用后者，因为CoreOS上有许多Docker的工具，而且该系统本身就是为了部署<br  />
+虚拟服务而使用的，而且不需要在Mac上安装Docker。<br  />
+CoreOS介绍请查看: <a href="https://coreos.com/">https://coreos.com/</a>
+</p>
+</div>
+
+<div id="outline-container-sec-1-4-1" class="outline-4">
+<h4 id="sec-1-4-1">安装</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<ol class="org-ol">
+<li>安装VirturalBox，下载地址<a href="https://www.virtualbox.org/wiki/Downloads">https://www.virtualbox.org/wiki/Downloads</a>
+</li>
+<li>安装Vagrant，下载地址<a href="http://www.vagrantup.com/downloads.html">http://www.vagrantup.com/downloads.html</a>
+</li>
+<li>安装CoreOS
+</li>
+</ol>
+<div class="org-src-container">
+
+<pre class="src src-sh">git clone https://github.com/coreos/coreos-vagrant.git
+<span style="color: #0000ff; font-weight: bold;">cd</span> coreos-vagrant
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#21551;&#21160;CoreOS</span>
+vagrant up
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">SSH &#36827;&#20837;vagrant</span>
+vagrant ssh
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#26597;&#30475;docker version</span>
+docker version
+
+Client version: 0.11.1
+Client API version: 1.11
+Go version (client): go1.2
+Git commit (client): fb99f99
+Server version: 0.11.1
+Server API version: 1.11
+Git commit (server): fb99f99
+Go version (server): go1.2
+</pre>
+</div>
+<p>
+至此Docker环境已经搞定。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5">使用Docker</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+首先请查看官方的基础教程，移步<a href="https://www.docker.io/gettingstarted/">https://www.docker.io/gettingstarted/</a>  <br  />
+</p>
+
+<p>
+Docker类似Git，可以使用pull命令获取公共镜像。<br  />
+如我的开发环境需要Mysql，我可以很方便的使用下面的命令获取镜像。<br  />
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#26597;&#25214;&#21253;&#21547;MySql&#26381;&#21153;&#30340;&#38236;&#20687;</span>
+docker search mysql
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#25214;&#21040;&#21518;</span>
+docker pull tutum/mysql
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#19979;&#36733;&#23436;&#25104;&#21518;&#36816;&#34892;&#65292; -d &#26159;deamon&#26041;&#24335;&#36816;&#34892;&#65292;-p &#26159;&#31471;&#21475;&#36716;&#21457;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#21629;&#20196;&#30340;&#24847;&#24605;&#26159;&#21518;&#21488;&#36816;&#34892;&#36825;&#20010;Container&#65292;&#24182;&#19988;&#23558;CoreOS&#30340;3306&#31471;&#21475;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#36716;&#21457;&#21040;Container&#30340;3306&#31471;&#21475;&#19978;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#23487;&#20027;&#26426;&#22120;&#65288;Mac&#65289;&#23601;&#21487;&#20197;&#36890;&#36807;mysql -h CoreOS&#30340;&#22806;&#32593;IP -u admin -p</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#36830;&#25509;Mysql&#26381;&#21153;&#20102;</span>
+docker run -d -p 3306:3306 tutum/mysql
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6" class="outline-3">
+<h3 id="sec-1-6">Docker 常用命令</h3>
+<div class="outline-text-3" id="text-1-6">
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#26597;&#30475;&#25152;&#26377;image</span>
+docker images
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#26597;&#30475;&#27491;&#22312;&#36816;&#34892;&#30340;Container&#65292;-l &#26159;&#26368;&#21518;&#36816;&#34892;&#30340;Container&#65292;-a &#25152;&#26377;&#36816;&#34892;&#30340;Container</span>
+docker ps
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#26597;&#30475;Container&#30340;&#36816;&#34892;&#20449;&#24687;</span>
+docker logs container_id
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#26597;&#30475;Container&#30340;&#37197;&#32622;&#20449;&#24687;&#12290;</span>
+docker inspect
+
+<span style="color: #ff0000;">#</span><span style="color: #ff0000;">&#20132;&#20114;&#24335;&#36816;&#34892;shell&#65292;&#23601;&#20687;ssh&#21040;Container&#19968;&#26679;&#65292;&#21487;&#20197;&#22312;Container&#37324;Do everything</span>
+docker run -i -t image_id /bin/bash
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#23558;&#23545;Container&#30340;&#20462;&#25913;&#25552;&#20132;&#65292;&#23450;&#21046;&#33258;&#24049;&#30340;Image</span>
+docker commit container_id image_name
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#21024;&#38500;&#25152;&#26377;&#30340;&#38236;&#20687;&#65288;&#24910;&#29992;&#65289;</span>
+docker kill $(docker ps -q) ; docker rm $(docker ps -a -q) ; docker rmi $(docker images -q -a)
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#21024;&#38500;&#25152;&#26377;&#30340;Container</span>
+sudo docker rm <span style="color: #ff00ff;">`sudo docker ps -a -q`</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-7" class="outline-3">
+<h3 id="sec-1-7">进阶用法（后续补充）</h3>
+<div class="outline-text-3" id="text-1-7">
+<ol class="org-ol">
+<li>定制Docker image， 使用Dockerfile
+</li>
+<li>使用fleet 管理Docker service
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-8" class="outline-3">
+<h3 id="sec-1-8">参考</h3>
+<div class="outline-text-3" id="text-1-8">
 <blockquote>
 <p>
-<a href="http:tech.uc.cn/?p=2726">http:tech.uc.cn/?p=2726</a>
+<a href="http://tech.uc.cn/?p=2726">http://tech.uc.cn/?p=2726</a> <br  />
+<a href="http://cn.soulmachine.me/blog/20131026/">http://cn.soulmachine.me/blog/20131026/</a> <br  />
+<a href="http://blog.segmentfault.com/yexiaobai/1190000000482229">http://blog.segmentfault.com/yexiaobai/1190000000482229</a> <br  />
 </p>
 </blockquote>
 
