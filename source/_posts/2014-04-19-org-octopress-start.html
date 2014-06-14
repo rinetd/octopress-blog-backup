@@ -2,7 +2,7 @@
 title: "octopress+org-mode写博客"
 date: 2014-04-19
 layout: post
-categories: 
+categories: [Emacs, Org]
 published: true
 comments: true
 ---
@@ -163,23 +163,23 @@ mac使用brew可以直接安装：
 </p>
 <div class="org-src-container">
 
-<pre class="src src-lisp">;;; org mode
-;;; &#25171;&#24320;&#21518;&#32512;&#21517;&#20026;org&#30340;&#25991;&#20214;&#26102;&#33258;&#21160;&#21551;&#29992;org mode
+<pre class="src src-lisp"><span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">org mode</span>
+<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">&#25171;&#24320;&#21518;&#32512;&#21517;&#20026;org&#30340;&#25991;&#20214;&#26102;&#33258;&#21160;&#21551;&#29992;org mode</span>
 (add-to-list 'auto-mode-alist '(<span style="color: #00ff00;">"\\.org\\'"</span> . org-mode))
 (global-font-lock-mode 1)
 
-;;; org octopress
-;;; &#27880;&#24847;&#23558;optopress&#36335;&#24452;&#38656;&#35201;&#26367;&#25442;&#25104;&#20320;&#30340;optopress&#36335;&#24452;
-(require 'org-octopress)
+<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">org octopress</span>
+<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">&#27880;&#24847;&#23558;optopress&#36335;&#24452;&#38656;&#35201;&#26367;&#25442;&#25104;&#20320;&#30340;optopress&#36335;&#24452;</span>
+(<span style="color: #00ffff; font-weight: bold;">require</span> '<span style="color: #ff00ff;">org-octopress</span>)
 (setq org-octopress-directory-top       <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source/org_pos/source"</span>)
 (setq org-octopress-directory-posts     <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source/_posts"</span>)
 (setq org-octopress-directory-org-top   <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source"</span>)
 (setq org-octopress-directory-org-posts <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/source/blog"</span>)
-;;; &#38656;&#35201;&#25335;&#36125;https:////github.com/yoshinari-nomura/org-octopress &#30340;setupfile-sample.org &#21040;&#19979;&#38754;&#30340;&#30446;&#24405;
-;;; &#24182;&#19988;&#38656;&#35201;&#26356;&#25442;&#21517;&#23383;
+<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">&#38656;&#35201;&#25335;&#36125;https:////github.com/yoshinari-nomura/org-octopress &#30340;setupfile-sample.org &#21040;&#19979;&#38754;&#30340;&#30446;&#24405;</span>
+<span style="color: #ff0000;">;;; </span><span style="color: #ff0000;">&#24182;&#19988;&#38656;&#35201;&#26356;&#25442;&#21517;&#23383;</span>
 (setq org-octopress-setup-file          <span style="color: #00ff00;">"~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org"</span>)
 
-(provide 'init-local)
+(<span style="color: #00ffff; font-weight: bold;">provide</span> '<span style="color: #ff00ff;">init-local</span>)
 </pre>
 </div>
 

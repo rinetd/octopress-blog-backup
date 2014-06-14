@@ -1,12 +1,12 @@
 ---
-title: "[PREVIEW] Clojure写DSL"
+title: "Clojure写DSL"
 date: 2014-05-31
 layout: post
 categories: Clojure
-published: false
+published: true
 comments: true
 ---
-<span style="background: red;">PREVIEW</span>
+
 <div id="outline-container-sec-1" class="outline-2">
 <h2 id="sec-1">Clojure写DSL</h2>
 <div class="outline-text-2" id="text-1">
@@ -36,17 +36,102 @@ DSL即领域编程语言，它是用于解决特定领域问题的语言。
 </div>
 
 <div id="outline-container-sec-1-3" class="outline-3">
-<h3 id="sec-1-3">为什么可以用Lisp来写DSL</h3>
+<h3 id="sec-1-3">为什么需要DSL</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
-学习中
+更好的描述问题是什么，增加语言的表现力。
 </p>
 </div>
 </div>
 
 <div id="outline-container-sec-1-4" class="outline-3">
-<h3 id="sec-1-4">参考</h3>
+<h3 id="sec-1-4">为什么可以用Lisp来写DSL</h3>
 <div class="outline-text-3" id="text-1-4">
+<ol class="org-ol">
+<li>Lisp中数据即代码，代码即数据。
+</li>
+<li>Lisp的Macro可以让你定义自己的控制结构，写出自己的编程语言。
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5">例子</h3>
+<div class="outline-text-3" id="text-1-5">
+</div><div id="outline-container-sec-1-5-1" class="outline-4">
+<h4 id="sec-1-5-1">Clojure实现一个Sql的DSL</h4>
+<div class="outline-text-4" id="text-1-5-1">
+<div class="org-src-container">
+
+<pre class="src src-lisp">(ns clojuresql.core)
+
+;;; jdbc &#39537;&#21160;
+(require '[clojure.java.jdbc :as jdbc])
+
+;;; &#25968;&#25454;&#24211;&#37197;&#32622;
+(def db-spec {
+              :subprotocol <span style="color: #00ff00;">"mysql"</span>
+              :subname <span style="color: #00ff00;">"//172.17.8.101:3306/didi_db"</span>
+              :user <span style="color: #00ff00;">"admin"</span>
+              :password <span style="color: #00ff00;">"root"</span>})
+
+;;; Select &#35821;&#21477;&#22788;&#29702;
+(defn select
+  [fields]
+  (clojure.string/join
+   <span style="color: #00ff00;">" "</span>
+   (concat
+    [<span style="color: #00ff00;">"SELECT"</span>]
+    [(clojure.string/join
+    <span style="color: #00ff00;">", "</span>
+    fields)])))
+
+;;; from &#35821;&#21477;&#22788;&#29702;
+(defn from
+  [&amp; table]
+  (clojure.string/join <span style="color: #00ff00;">" "</span> (concat [<span style="color: #00ff00;">"FROM"</span>] table)))
+
+;;; &#23450;&#20041;&#25511;&#21046;&#32467;&#26500;
+(defmacro cljsql
+  [&amp; sql_atom]
+  `(jdbc/query
+    db-spec
+    [(clojure.string/join <span style="color: #00ff00;">" "</span> (list ~@sql_atom))])
+  )
+
+;;; &#20351;&#29992;
+(cljsql (select [<span style="color: #00ff00;">"username"</span>, <span style="color: #00ff00;">"password"</span>])
+        (from <span style="color: #00ff00;">"auth_user"</span>))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-1-5-2" class="outline-4">
+<h4 id="sec-1-5-2">解释</h4>
+<div class="outline-text-4" id="text-1-5-2">
+<ol class="org-ol">
+<li>lisp是提倡自底向上设计的，如果没有思路，不妨从底层开始，如select函数和from函数。
+</li>
+<li>lisp的哲学每一层为上一层提供抽象愿语，如select和from函数为macro cljsql提供抽象原语。
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6" class="outline-3">
+<h3 id="sec-1-6">总结：</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+Lisp 强大还是在于她本身的语言表现力，描述问题是什么，而不是怎么去做。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-7" class="outline-3">
+<h3 id="sec-1-7">参考</h3>
+<div class="outline-text-3" id="text-1-7">
 <blockquote>
 <p>
 <a href="http://coolshell.cn/articles/10822.html">http://coolshell.cn/articles/10822.html</a> <br  />

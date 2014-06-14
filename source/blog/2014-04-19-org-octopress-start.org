@@ -2,7 +2,7 @@
 #+DATE: 2014-04-19
 #+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
 #+JEKYLL_LAYOUT: post
-#+JEKYLL_CATEGORIES:
+#+JEKYLL_CATEGORIES: [Emacs, Org]
 #+JEKYLL_PUBLISHED: true
 #+JEKYLL_COMMENTS: true
 

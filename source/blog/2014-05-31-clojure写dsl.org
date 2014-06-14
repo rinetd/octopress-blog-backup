@@ -3,7 +3,7 @@
 #+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
 #+JEKYLL_LAYOUT: post
 #+JEKYLL_CATEGORIES: Clojure
-#+JEKYLL_PUBLISHED: false
+#+JEKYLL_PUBLISHED: true
 #+JEKYLL_COMMENTS: true
 
 * Clojure写DSL
@@ -18,8 +18,62 @@
 ** 什么是DSL
 DSL即领域编程语言，它是用于解决特定领域问题的语言。
 
+** 为什么需要DSL
+更好的描述问题是什么，增加语言的表现力。
+
 ** 为什么可以用Lisp来写DSL
-学习中
+1. Lisp中数据即代码，代码即数据。
+2. Lisp的Macro可以让你定义自己的控制结构，写出自己的编程语言。
+
+** 例子
+*** Clojure实现一个Sql的DSL
+#+BEGIN_SRC lisp
+(ns clojuresql.core)
+
+;;; jdbc 驱动
+(require '[clojure.java.jdbc :as jdbc])
+
+;;; 数据库配置
+(def db-spec {
+              :subprotocol "mysql"
+              :subname "//172.17.8.101:3306/didi_db"
+              :user "admin"
+              :password "root"})
+
+;;; Select 语句处理
+(defn select
+  [fields]
+  (clojure.string/join
+   " "
+   (concat
+    ["SELECT"]
+    [(clojure.string/join
+    ", "
+    fields)])))
+
+;;; from 语句处理
+(defn from
+  [& table]
+  (clojure.string/join " " (concat ["FROM"] table)))
+
+;;; 定义控制结构
+(defmacro cljsql
+  [& sql_atom]
+  `(jdbc/query
+    db-spec
+    [(clojure.string/join " " (list ~@sql_atom))])
+  )
+
+;;; 使用
+(cljsql (select ["username", "password"])
+        (from "auth_user"))
+#+END_SRC
+*** 解释
+1. lisp是提倡自底向上设计的，如果没有思路，不妨从底层开始，如select函数和from函数。
+2. lisp的哲学每一层为上一层提供抽象愿语，如select和from函数为macro cljsql提供抽象原语。
+
+** 总结：
+Lisp 强大还是在于她本身的语言表现力，描述问题是什么，而不是怎么去做。
 
 ** 参考
 #+BEGIN_QUOTE
