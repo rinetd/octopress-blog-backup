@@ -1,0 +1,58 @@
+#+TITLE: salt使用笔记
+#+DATE: 2014-06-21
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: salt
+#+JEKYLL_PUBLISHED: false
+#+JEKYLL_COMMENTS: true
+
+* saltstack使用笔记
+
+** 来由：
+公司需要部署把服务部署到自己的服务器中，每次迁移服务都得重新安装软件\\
+配置什么东西，身为程序员的我本身比较懒，就想找个工具把配置写好，下次\\
+部署的时候直接使用配置来玩，而不是每次都手工，所以就发现了 *saltstack*\\
+这个自动化部署工具了。\\
+
+** 简介
+salt采用的C/S架构，主机master和客户端minion，master通过命令控制客户端minion \\
+进行相应的任务（软件安装，配置，重启，定时任务，状态监控。。。）。
+
+** 核心
+远程执行引擎是Salt的核心，它能够为多组系统创建高速、安全的双向通讯网络。\\
+基于这个通许系统，Salt提供了一个非常快速、灵活并且容易使用的配置管理系统，\\
+称之为“Salt States”。\\
+
+** 安装配置
+参考 http://docs.saltstack.cn/topics/tutorials/walkthrough.html \\
+#+BEGIN_SRC sh
+# 运行
+salt-key -L
+# 如果出现客户端机器，说明配置成功了
+#+END_SRC
+
+** 使用
+*** salt state
+SLS（代表SaLt State文件）只是结构化的数据。\\
+#+BEGIN_SRC sh
+# 运行
+salt '*' state.highstate
+# 会让所有的minion到master上来取走自己的SLS定义
+
+# 模拟运行
+salt 'minion1.example.com' state.highstate -v test=True
+#+END_SRC
+
+*** 更多使用教程
+官方文档 http://docs.saltstack.com/
+
+** 后续
+等我把公司服务器折腾完后再补充一些实践教程。
+
+** 参考
+#+BEGIN_QUOTE
+[[http://docs.saltstack.cn/topics/tutorials/walkthrough.html][SaltStack演练]] \\
+http://docs.saltstack.cn/topics/tutorials/starting_states.html \\
+
+#+END_QUOTE
+{{{more}}}
