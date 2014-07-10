@@ -1,0 +1,165 @@
+---
+title: "saltstack自定义模块"
+date: 2014-07-11
+layout: post
+categories: saltstack
+published: true
+comments: true
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">SaltStack自定义模块</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">来由</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+公司项目以前使用的是fabric将代码部署到云平台，现在迁移到本地的服务器，<br  />
+再使用fabric显然有点不合适，然而使用SaltStack的state来描述发版本的过 <br  />
+程又略显不灵活，所以决定自己编写一个SaltStack的模块来实现版本发布的需求，<br  />
+下面给出编写自定义模块的方法。<br  />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">版本发布流程</h3>
+<div class="outline-text-3" id="text-1-2">
+<ol class="org-ol">
+<li>使用git pull最新的master代码。
+</li>
+<li>使用脚本替换一些变量。
+</li>
+<li>一些其他的操作
+</li>
+<li>重启supervisor开启的uwsgi服务。
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">如何编写SaltStack自定义模块</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+编写SaltStack自定义模块超级简单，前提是需要你会一些Python编程，具体如下： <br  />
+</p>
+</div>
+
+<div id="outline-container-sec-1-3-1" class="outline-4">
+<h4 id="sec-1-3-1">步骤</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<ol class="org-ol">
+<li>首先需要在master机器的file_roots 下建一个_modules文件夹，里面放.py 文件，也就是自定义模块。
+<ul class="org-ul">
+<li>file_roots 在/etc/salt/master 里可以设置，默认是/srv/salt/，即你需要在这个目录下新建文件夹_modules
+</li>
+</ul>
+</li>
+<li>在_modules里新建自定义模块，然后编写相应的代码。
+<ul class="org-ul">
+<li>比如模块名是foo，在里面定义了方法bar。
+</li>
+</ul>
+</li>
+<li>写完代码后，使用命令 salt '*' saltutil.sync_all 将自定义模块同步到各个minion上。
+<ul class="org-ul">
+<li>也可以使用 salt '*' saltutil.sync_modules 将自定义模块同步到minion上
+</li>
+</ul>
+</li>
+<li>运行自定也模块，使用命令 salt '*' foo.bar
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-2" class="outline-4">
+<h4 id="sec-1-3-2">实例</h4>
+<div class="outline-text-4" id="text-1-3-2">
+<p>
+目录结构：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">srv
+<span style="color: #00ff00;">\-</span>- salt
+   <span style="color: #00ff00;">\-</span>- _modules
+       <span style="color: #00ff00;">\-</span>- foo.py
+   <span style="color: #00ff00;">\-</span>- prod
+   ...
+</pre>
+</div>
+
+<p>
+自定义模块代码:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">coding: utf-8</span>
+
+<span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">bar</span>():
+    <span style="color: #ffff00;">CMD_RUN</span> = __salt__[<span style="color: #00ff00;">'cmd.run'</span>]
+    <span style="color: #ffff00;">cmd</span> = <span style="color: #00ff00;">"ls /etc/init"</span>
+    <span style="color: #00ffff; font-weight: bold;">return</span> CMD_RUN(cmd)
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#35299;&#37322;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#33258;&#23450;&#20041;&#27169;&#22359;&#20250;&#21152;&#36733;__salt__&#21464;&#37327;&#65292;&#36825;&#20010;dict&#21464;&#37327;&#37324;&#21253;&#21547;&#25152;&#26377;&#30340;salt function</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#19978;&#38754;&#30340;cmd.run&#23601;&#26159;salt&#30340;&#21629;&#20196;&#36816;&#34892;&#20989;&#25968;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">__salt__&#21464;&#37327;&#24517;&#39035;&#22312;&#33258;&#23450;&#20041;&#30340;&#27169;&#22359;&#37324;&#20351;&#29992;&#65292;&#20063;&#23601;&#26159;&#24517;&#39035;&#22312;&#33258;&#23450;&#19968;&#30340;&#26041;&#27861;&#20013;&#20351;&#29992;&#65292;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#22914;&#19978;&#38754;&#30340;bar&#26041;&#27861;&#65292;&#19981;&#33021;&#23558;__salt__&#21464;&#37327;&#25918;&#21040;&#20840;&#23616;&#21464;&#37327;&#20013;&#20351;&#29992;&#65292;&#21542;&#21017;&#20250;&#25253;__salt__&#21464;&#37327;&#20026;&#23450;&#20041;</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">注意事项</h3>
+<div class="outline-text-3" id="text-1-4">
+<ol class="org-ol">
+<li>如果要使用__salt__变量，必须要在自定义的方法中使用，不能在全局变量中使用。
+</li>
+<li>如果运行命令报错了，如报 foo.bar is not avaliable，请到minion机器上去查看具体的日志。
+<ul class="org-ul">
+<li>报上述错误并不是模块没有同步到minion上，而是你编写的模块运行有问题。
+</li>
+<li>minion的日志记录在/var/log/salt/minion中，可以去这里查看具体错误。
+</li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5">最后的思考</h3>
+<div class="outline-text-3" id="text-1-5">
+<ol class="org-ol">
+<li>编写SaltStack自定义模块很简单、方便。
+</li>
+<li>实现自定义模块的过程中，可以发扬NIH(Not invent here)的思想。
+<ul class="org-ul">
+<li>可以充分利用__salt__变量里的salt自带函数来实现你想要的功能。
+</li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6" class="outline-3">
+<h3 id="sec-1-6">参考</h3>
+<div class="outline-text-3" id="text-1-6">
+<blockquote>
+<p>
+<a href="http://docs.saltstack.com/en/latest/ref/modules/">Execution Modules</a>
+</p>
+</blockquote>
+
+<p>
+<!-- more -->
+</p>
+</div>
+</div>
+</div>

@@ -1,0 +1,78 @@
+#+TITLE: saltstack自定义模块
+#+DATE: 2014-07-11
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: saltstack
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* SaltStack自定义模块
+
+** 来由
+公司项目以前使用的是fabric将代码部署到云平台，现在迁移到本地的服务器，\\
+再使用fabric显然有点不合适，然而使用SaltStack的state来描述发版本的过 \\
+程又略显不灵活，所以决定自己编写一个SaltStack的模块来实现版本发布的需求，\\
+下面给出编写自定义模块的方法。\\
+
+** 版本发布流程
+1. 使用git pull最新的master代码。
+2. 使用脚本替换一些变量。
+3. 一些其他的操作
+4. 重启supervisor开启的uwsgi服务。
+
+** 如何编写SaltStack自定义模块
+编写SaltStack自定义模块超级简单，前提是需要你会一些Python编程，具体如下： \\
+
+*** 步骤
+1. 首先需要在master机器的file_roots 下建一个_modules文件夹，里面放.py 文件，也就是自定义模块。
+   + file_roots 在/etc/salt/master 里可以设置，默认是/srv/salt/，即你需要在这个目录下新建文件夹_modules
+2. 在_modules里新建自定义模块，然后编写相应的代码。
+   + 比如模块名是foo，在里面定义了方法bar。
+3. 写完代码后，使用命令 salt '*' saltutil.sync_all 将自定义模块同步到各个minion上。
+   + 也可以使用 salt '*' saltutil.sync_modules 将自定义模块同步到minion上
+4. 运行自定也模块，使用命令 salt '*' foo.bar
+
+*** 实例
+目录结构：
+#+BEGIN_SRC sh
+srv
+\-- salt
+   \-- _modules
+       \-- foo.py
+   \-- prod
+   ...
+#+END_SRC
+
+自定义模块代码:
+#+BEGIN_SRC python
+# coding: utf-8
+
+def bar():
+    CMD_RUN = __salt__['cmd.run']
+    cmd = "ls /etc/init"
+    return CMD_RUN(cmd)
+
+# 解释
+# 自定义模块会加载__salt__变量，这个dict变量里包含所有的salt function
+# 上面的cmd.run就是salt的命令运行函数
+# __salt__变量必须在自定义的模块里使用，也就是必须在自定一的方法中使用，
+# 如上面的bar方法，不能将__salt__变量放到全局变量中使用，否则会报__salt__变量为定义
+#+END_SRC
+
+** 注意事项
+1. 如果要使用__salt__变量，必须要在自定义的方法中使用，不能在全局变量中使用。
+2. 如果运行命令报错了，如报 foo.bar is not avaliable，请到minion机器上去查看具体的日志。
+   + 报上述错误并不是模块没有同步到minion上，而是你编写的模块运行有问题。
+   + minion的日志记录在/var/log/salt/minion中，可以去这里查看具体错误。
+
+** 最后的思考
+1. 编写SaltStack自定义模块很简单、方便。
+2. 实现自定义模块的过程中，可以发扬NIH(Not invent here)的思想。
+   + 可以充分利用__salt__变量里的salt自带函数来实现你想要的功能。
+
+** 参考
+#+BEGIN_QUOTE
+[[http:////docs.saltstack.com/en/latest/ref/modules/][Execution Modules]]
+#+END_QUOTE
+
+{{{more}}}
