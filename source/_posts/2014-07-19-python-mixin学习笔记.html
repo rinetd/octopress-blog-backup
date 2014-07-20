@@ -1,0 +1,303 @@
+---
+title: "Python Mixin学习笔记"
+date: 2014-07-19
+layout: post
+categories: Python
+published: true
+comments: true
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Python Mixin学习笔记</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">来由</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+对python的面向对象编程研究的比较少，然而django是从1.3推荐使用class base view的，
+所以免不了会用到python的面向对象的特性，所以把研究的东西记录一下。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">知识点</h3>
+<div class="outline-text-3" id="text-1-2">
+<ol class="org-ol">
+<li>Python 面向对象的基本使用
+</li>
+<li>Python 中的静态方法、类方法、实例方法
+</li>
+<li>Python 中多继承的方法执行顺序MRO
+</li>
+<li>Mixin 和多继承有什么区别及应用场景
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">Python 面向对象的基本使用</h3>
+<div class="outline-text-3" id="text-1-3">
+</div><div id="outline-container-sec-1-3-1" class="outline-4">
+<h4 id="sec-1-3-1">Python中有两种方法可以定义class分别是old school和new school</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">Foo</span>:
+    <span style="color: #00ff00;">'''old school&#19981;&#33021;&#20351;&#29992;super&#20851;&#38190;&#23383;'''</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">__init__</span>(<span style="color: #00ffff; font-weight: bold;">self</span>):
+        <span style="color: #00ffff; font-weight: bold;">pass</span>
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">Bar</span>(<span style="color: #0000ff; font-weight: bold;">object</span>):
+    <span style="color: #00ff00;">'''new school&#21487;&#20197;&#20351;&#29992;super&#20851;&#38190;&#23383;'''</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">__init__</span>(<span style="color: #00ffff; font-weight: bold;">self</span>):
+        <span style="color: #00ffff; font-weight: bold;">pass</span>
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#21306;&#21035;&#22312;&#20110;&#26159;&#21542;&#32487;&#25215;object&#65292;old school&#21644;new school&#30340;&#26041;&#24335;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#20250;&#24433;&#21709;&#22810;&#32487;&#25215;&#26041;&#27861;&#30340;&#25191;&#34892;&#39034;&#24207;&#65292;old school&#30340;&#26597;&#25214;&#39034;&#24207;&#24335;&#28145;&#24230;&#20248;&#20808;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">new school&#30340;&#26597;&#25214;&#39034;&#24207;&#24335;&#24191;&#24230;&#20248;&#20808;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#24819;&#35201;&#20351;&#29992;super&#20851;&#38190;&#23383;&#30340;&#35805;&#23601;&#20351;&#29992;&#26032;&#24335;&#31867;&#65292;&#32769;&#24335;&#31867;&#20250;&#25253;&#38169;&#65292;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">TypeError: must be type, not classobj</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">Python 中的类方法，静态方法和实例方法</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+<a href="http://www.libaoyin.com/2013/08/06/pyhton-staticmethod-classmethod/">python静态方法和类方法</a>
+</p>
+</div>
+<div id="outline-container-sec-1-4-1" class="outline-4">
+<h4 id="sec-1-4-1">静态方法</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">Foo</span>(<span style="color: #0000ff; font-weight: bold;">object</span>):
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">__init__</span>(<span style="color: #00ffff; font-weight: bold;">self</span>):
+        <span style="color: #00ffff; font-weight: bold;">pass</span>
+
+    <span style="color: #00ff00;">@staticmethod</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">do_something</span>():
+        <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">           &#26080;&#27861;&#35775;&#38382;&#31867;&#23646;&#24615;&#12289;&#23454;&#20363;&#23646;&#24615;&#65292;&#30456;&#24403;&#20110;&#19968;&#20010;&#30456;&#23545;&#29420;&#31435;&#30340;&#26041;&#27861;&#65292;</span>
+<span style="color: #00ff00;">           &#36319;&#31867;&#20854;&#23454;&#27809;&#20160;&#20040;&#20851;&#31995;&#65292;&#25442;&#20010;&#35282;&#24230;&#26469;&#35762;&#65292;&#20854;&#23454;&#23601;&#26159;&#25918;&#22312;&#19968;&#20010;</span>
+<span style="color: #00ff00;">           &#31867;&#30340;&#20316;&#29992;&#22495;&#37324;&#30340;&#20989;&#25968;&#32780;&#24050;&#12290;</span>
+<span style="color: #00ff00;">        '''</span>
+        <span style="color: #00ffff; font-weight: bold;">print</span> <span style="color: #00ff00;">'I am just a static method'</span>
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#20351;&#29992;</span>
+Foo.do_something()
+<span style="color: #ffff00;">f</span> = Foo()
+f.do_something()
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4-2" class="outline-4">
+<h4 id="sec-1-4-2">类方法</h4>
+<div class="outline-text-4" id="text-1-4-2">
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">Foo</span>(<span style="color: #0000ff; font-weight: bold;">object</span>):
+    <span style="color: #ffff00;">msg</span> = <span style="color: #00ff00;">'hello world'</span>
+
+    <span style="color: #00ff00;">@classmethod</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">do_something</span>(cls):
+        <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">        &#21487;&#20197;&#35775;&#38382;&#31867;&#23646;&#24615;&#65292;&#26080;&#27861;&#35775;&#38382;&#23454;&#20363;&#23646;&#24615;&#12290;</span>
+<span style="color: #00ff00;">        '''</span>
+        <span style="color: #00ffff; font-weight: bold;">print</span> cls.msg
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#20351;&#29992;</span>
+Foo.do_something()
+<span style="color: #ffff00;">f</span> = foo()
+f.do_something()
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4-3" class="outline-4">
+<h4 id="sec-1-4-3">实例方法</h4>
+<div class="outline-text-4" id="text-1-4-3">
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">Foo</span>(<span style="color: #0000ff; font-weight: bold;">object</span>):
+    <span style="color: #ffff00;">cls_msg</span> = <span style="color: #00ff00;">'I am a cls msg'</span>
+
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">__init__</span>(<span style="color: #00ffff; font-weight: bold;">self</span>):
+        <span style="color: #00ffff; font-weight: bold;">self</span>.ins_msg = <span style="color: #00ff00;">'I am a instance msg'</span>
+
+    <span style="color: #00ff00;">@staticmethod</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">static_do</span>():
+        <span style="color: #00ffff; font-weight: bold;">print</span> <span style="color: #00ff00;">'I am a static msg</span>
+
+<span style="color: #00ff00;">    @classmethod</span>
+<span style="color: #00ff00;">    def class_do(cls):</span>
+<span style="color: #00ff00;">        print cls.cls_msg</span>
+
+<span style="color: #00ff00;">    def instance_do(self):</span>
+<span style="color: #00ff00;">        '''</span>&#21487;&#20197;&#35775;&#38382;&#31867;&#23646;&#24615;<span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">        print self.ins_msg</span>
+<span style="color: #00ff00;">        print Foo.cls_msg</span>
+
+<span style="color: #00ff00;"># &#20351;&#29992;</span>
+<span style="color: #00ff00;">f = Foo()</span>
+
+<span style="color: #00ff00;">f.static_do()</span>
+<span style="color: #00ff00;"># I am a static msg</span>
+
+<span style="color: #00ff00;">f.class_do()</span>
+<span style="color: #00ff00;"># I am a cls msg</span>
+
+<span style="color: #00ff00;">f.instance_do()</span>
+<span style="color: #00ff00;"># I am a instance msg</span>
+<span style="color: #00ff00;"># I am a cls msg</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4-4" class="outline-4">
+<h4 id="sec-1-4-4">小结</h4>
+<div class="outline-text-4" id="text-1-4-4">
+<ol class="org-ol">
+<li>python的类方法可以用来写工具类。
+</li>
+<li>静态方法暂时没有想到他的具体用途
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5">Python 中的继承方法执行顺序MRO(method resolution order)</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+old school使用深度优先从左到右解析，new school使用C3算法，总而言之，
+代码里面不要把old school和new school混合。
+</p>
+</div>
+</div>
+<div id="outline-container-sec-1-6" class="outline-3">
+<h3 id="sec-1-6">Mixin 和多继承有什么区别和应用场景</h3>
+<div class="outline-text-3" id="text-1-6">
+</div><div id="outline-container-sec-1-6-1" class="outline-4">
+<h4 id="sec-1-6-1">什么是Mixin</h4>
+<div class="outline-text-4" id="text-1-6-1">
+<p>
+个人觉得mixin是一种多继承机制，它的作用是，在运行期间，动态改变类<br  />
+的基类或类的方法，从而使得类的表现可以发生变化。<br  />
+</p>
+
+<p>
+注意：是在运行期间动态的改变类的基类或类的方法。<br  />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6-2" class="outline-4">
+<h4 id="sec-1-6-2">什么时候需要Mixin <a href="http://xiaocong.github.io/blog/2012/06/13/python-mixin-and-mro/">参考这篇文章</a></h4>
+<div class="outline-text-4" id="text-1-6-2">
+<ol class="org-ol">
+<li>你希望给一个类提供很多可选的特征(feature).
+</li>
+<li>你希望在很多不同的类中使用一个特定的特征(feature).
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6-3" class="outline-4">
+<h4 id="sec-1-6-3">关于Mixin 的思考</h4>
+<div class="outline-text-4" id="text-1-6-3">
+<p>
+mixin无非是为了扩展类的方法，至于是动态的改变还是怎么去改变，我觉得<br  />
+没有必要去在意这些细节，如果你想为一个类实现扩展而不想去改这个类的代码<br  />
+你就用mixin也就是多继承去实现吧，至于是运行期间改变还是什么时候去改变，<br  />
+完全由你的业务和你要解决的问题决定。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6-4" class="outline-4">
+<h4 id="sec-1-6-4">实例分析</h4>
+<div class="outline-text-4" id="text-1-6-4">
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">GenericFeature1</span>(<span style="color: #0000ff; font-weight: bold;">object</span>):
+    <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">       &#36890;&#29992;feature1</span>
+<span style="color: #00ff00;">    '''</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">generic_do1</span>(<span style="color: #00ffff; font-weight: bold;">self</span>):
+        <span style="color: #00ffff; font-weight: bold;">pass</span>
+
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">GenericFeature2</span>(<span style="color: #0000ff; font-weight: bold;">object</span>):
+    <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">       &#36890;&#29992;feature2</span>
+<span style="color: #00ff00;">    '''</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">generic_do2</span>(<span style="color: #00ffff; font-weight: bold;">self</span>):
+        <span style="color: #00ffff; font-weight: bold;">pass</span>
+
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">Foo</span>(GenericFeature1, GenericFeature2):
+    <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">       &#23450;&#20041;&#19968;&#20010;&#31867;&#65292;&#23427;&#25152;&#26377;&#30340;&#26041;&#27861;&#24050;&#32463;&#26126;&#30830;&#12290;</span>
+<span style="color: #00ff00;">    '''</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">dothing1</span>(<span style="color: #00ffff; font-weight: bold;">self</span>):
+        <span style="color: #00ffff; font-weight: bold;">pass</span>
+
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">dothing2</span>(<span style="color: #00ffff; font-weight: bold;">self</span>):
+        <span style="color: #00ffff; font-weight: bold;">pass</span>
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#22914;&#26524;&#24819;&#35201;&#32473;&#31867;&#28155;&#21152;&#26032;&#30340;feature&#65292;&#26377;&#20004;&#31181;&#26041;&#26696;&#65292;&#19968;&#31181;&#26159;&#30452;&#25509;&#22312;&#31867;&#37324;&#38754;&#28155;&#21152;&#65292;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#19968;&#31181;&#26159;&#36890;&#36807;&#22810;&#32487;&#25215;&#65292;&#26469;&#25193;&#23637;&#31867;&#30340;&#21151;&#33021;&#65292;&#20855;&#20307;&#20351;&#29992;&#21738;&#31181;&#26041;&#27861;&#36824;&#26159;&#30475;&#20320;&#30340;&#19994;&#21153;&#21644;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#38754;&#20020;&#30340;&#38382;&#39064;&#65292;&#22914;&#26524;&#36825;&#20010;feature&#20854;&#20182;&#30340;&#31867;&#20063;&#20250;&#29992;&#21040;&#65292;&#23601;&#20351;&#29992;&#22810;&#32487;&#25215;&#30340;&#26041;&#24335;&#65292;&#22914;&#26524;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#21482;&#26377;&#19968;&#20010;&#31867;&#29992;&#21040;&#65292;&#30452;&#25509;&#28155;&#21152;&#21363;&#21487;&#65292;&#35774;&#35745;&#26412;&#36523;&#26159;&#19968;&#20010;&#21453;&#22797;&#30340;&#36807;&#31243;&#65292;&#21482;&#26377;&#19981;&#26029;&#30340;</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#38613;&#29730;&#21644;&#25171;&#30952;&#25165;&#33021;&#21019;&#36896;&#20986;&#20248;&#38597;&#30340;&#35774;&#35745;&#12290;</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-7" class="outline-3">
+<h3 id="sec-1-7">总结</h3>
+<div class="outline-text-3" id="text-1-7">
+<ol class="org-ol">
+<li>面向对象的思想其实和UNIX的设计思想其实是一致，K.I.S.S
+</li>
+<li>组合优于继承，继承的结构不宜太多，我比较欣赏单一继承结构
+</li>
+<li>Mixin其实还是解决高内聚，低耦合的问题
+</li>
+<li>总而言之，K.I.S.S
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-8" class="outline-3">
+<h3 id="sec-1-8">参考</h3>
+<div class="outline-text-3" id="text-1-8">
+<blockquote>
+<p>
+<a href="http://www.libaoyin.com/2013/08/06/pyhton-staticmethod-classmethod/">python静态方法和类方法</a> <br  />
+<a href="http://xiaocong.github.io/blog/2012/06/13/python-mixin-and-mro/">Python Mixin and MRO</a> <br  />
+</p>
+</blockquote>
+
+<p>
+<!-- more -->
+</p>
+</div>
+</div>
+</div>

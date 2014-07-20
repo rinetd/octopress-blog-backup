@@ -1,0 +1,190 @@
+#+TITLE: Python Mixin学习笔记
+#+DATE: 2014-07-19
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: Python
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* Python Mixin学习笔记
+
+** 来由
+对python的面向对象编程研究的比较少，然而django是从1.3推荐使用class base view的，
+所以免不了会用到python的面向对象的特性，所以把研究的东西记录一下。
+
+** 知识点
+1. Python 面向对象的基本使用
+2. Python 中的静态方法、类方法、实例方法
+3. Python 中多继承的方法执行顺序MRO
+4. Mixin 和多继承有什么区别及应用场景
+
+** Python 面向对象的基本使用
+*** Python中有两种方法可以定义class分别是old school和new school
+#+BEGIN_SRC python
+class Foo:
+    '''old school不能使用super关键字'''
+    def __init__(self):
+        pass
+
+class Bar(object):
+    '''new school可以使用super关键字'''
+    def __init__(self):
+        pass
+
+# 区别在于是否继承object，old school和new school的方式
+# 会影响多继承方法的执行顺序，old school的查找顺序式深度优先
+# new school的查找顺序式广度优先
+# 想要使用super关键字的话就使用新式类，老式类会报错，
+# TypeError: must be type, not classobj
+#+END_SRC
+
+** Python 中的类方法，静态方法和实例方法
+[[http:////www.libaoyin.com/2013/08/06/pyhton-staticmethod-classmethod/][python静态方法和类方法]]
+*** 静态方法
+#+BEGIN_SRC python
+class Foo(object):
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def do_something():
+        '''
+           无法访问类属性、实例属性，相当于一个相对独立的方法，
+           跟类其实没什么关系，换个角度来讲，其实就是放在一个
+           类的作用域里的函数而已。
+        '''
+        print 'I am just a static method'
+
+# 使用
+Foo.do_something()
+f = Foo()
+f.do_something()
+#+END_SRC
+
+*** 类方法
+#+BEGIN_SRC python
+class Foo(object):
+    msg = 'hello world'
+
+    @classmethod
+    def do_something(cls):
+        '''
+        可以访问类属性，无法访问实例属性。
+        '''
+        print cls.msg
+
+# 使用
+Foo.do_something()
+f = foo()
+f.do_something()
+#+END_SRC
+
+*** 实例方法
+#+BEGIN_SRC python
+class Foo(object):
+    cls_msg = 'I am a cls msg'
+
+    def __init__(self):
+        self.ins_msg = 'I am a instance msg'
+
+    @staticmethod
+    def static_do():
+        print 'I am a static msg
+
+    @classmethod
+    def class_do(cls):
+        print cls.cls_msg
+
+    def instance_do(self):
+        '''可以访问类属性'''
+        print self.ins_msg
+        print Foo.cls_msg
+
+# 使用
+f = Foo()
+
+f.static_do()
+# I am a static msg
+
+f.class_do()
+# I am a cls msg
+
+f.instance_do()
+# I am a instance msg
+# I am a cls msg
+#+END_SRC
+
+*** 小结
+1. python的类方法可以用来写工具类。
+2. 静态方法暂时没有想到他的具体用途
+
+** Python 中的继承方法执行顺序MRO(method resolution order)
+old school使用深度优先从左到右解析，new school使用C3算法，总而言之，
+代码里面不要把old school和new school混合。
+** Mixin 和多继承有什么区别和应用场景
+*** 什么是Mixin
+个人觉得mixin是一种多继承机制，它的作用是，在运行期间，动态改变类\\
+的基类或类的方法，从而使得类的表现可以发生变化。\\
+
+注意：是在运行期间动态的改变类的基类或类的方法。\\
+
+*** 什么时候需要Mixin [[http:////xiaocong.github.io/blog/2012/06/13/python-mixin-and-mro/][参考这篇文章]]
+1. 你希望给一个类提供很多可选的特征(feature).
+2. 你希望在很多不同的类中使用一个特定的特征(feature).
+
+*** 关于Mixin 的思考
+mixin无非是为了扩展类的方法，至于是动态的改变还是怎么去改变，我觉得\\
+没有必要去在意这些细节，如果你想为一个类实现扩展而不想去改这个类的代码\\
+你就用mixin也就是多继承去实现吧，至于是运行期间改变还是什么时候去改变，\\
+完全由你的业务和你要解决的问题决定。
+
+*** 实例分析
+#+BEGIN_SRC python
+class GenericFeature1(object):
+    '''
+       通用feature1
+    '''
+    def generic_do1(self):
+        pass
+
+
+class GenericFeature2(object):
+    '''
+       通用feature2
+    '''
+    def generic_do2(self):
+        pass
+
+
+class Foo(GenericFeature1, GenericFeature2):
+    '''
+       定义一个类，它所有的方法已经明确。
+    '''
+    def dothing1(self):
+        pass
+
+    def dothing2(self):
+        pass
+
+# 如果想要给类添加新的feature，有两种方案，一种是直接在类里面添加，
+# 一种是通过多继承，来扩展类的功能，具体使用哪种方法还是看你的业务和
+# 面临的问题，如果这个feature其他的类也会用到，就使用多继承的方式，如果
+# 只有一个类用到，直接添加即可，设计本身是一个反复的过程，只有不断的
+# 雕琢和打磨才能创造出优雅的设计。
+
+#+END_SRC
+
+** 总结
+1. 面向对象的思想其实和UNIX的设计思想其实是一致，K.I.S.S
+2. 组合优于继承，继承的结构不宜太多，我比较欣赏单一继承结构
+3. Mixin其实还是解决高内聚，低耦合的问题
+4. 总而言之，K.I.S.S
+
+** 参考
+#+begin_quote
+[[http:////www.libaoyin.com/2013/08/06/pyhton-staticmethod-classmethod/][python静态方法和类方法]] \\
+[[http:////xiaocong.github.io/blog/2012/06/13/python-mixin-and-mro/][Python Mixin and MRO]] \\
+
+#+END_QUOTE
+
+{{{more}}}

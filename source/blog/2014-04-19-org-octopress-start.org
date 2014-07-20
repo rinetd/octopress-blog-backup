@@ -6,7 +6,6 @@
 #+JEKYLL_PUBLISHED: true
 #+JEKYLL_COMMENTS: true
 
-
 **** 主要内容
      1. 安装octopress
         + 什么是octopress
