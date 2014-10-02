@@ -1,0 +1,286 @@
+---
+title: "Python使用支付宝接口"
+date: 2014-10-02
+layout: post
+categories: [Python, Alipay]
+published: true
+comments: true
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Python使用支付宝接口</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">来源</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+<i>www.pinbot.me</i>需要支持线上支付，先从支持支付宝开始。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">使用支付宝什么接口</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+支付宝接口有很多，而线上支付使用的是即时到账接口，这里有<a href="https:b.alipay.com/order/productDetail.htm?productId=2012111200373124&tabId=1#ps-tabinfo-hash">官方介绍</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">如何使用该接口</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+实现代码参考了<a href="https:github.com/yefei/python-alipay">python-alipay</a>
+</p>
+</div>
+
+<div id="outline-container-sec-1-3-1" class="outline-4">
+<h4 id="sec-1-3-1">获取PID和32位KEY</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<p>
+只能是企业才能申请该接口的使用，实名认证通过后，你只要拿到PID和KEY <br  />
+就行了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-2" class="outline-4">
+<h4 id="sec-1-3-2">使用该接口</h4>
+<div class="outline-text-4" id="text-1-3-2">
+</div><ul class="org-ul"><li>使用该接口需要实现两个工具函数:<br  /><div class="outline-text-5" id="text-1-3-2-1">
+<ol class="org-ol">
+<li>构造支付宝的支付链接，如果链接请求成功会生存支付宝的支付页面。
+</li>
+<li>支付成功后需要验证支付宝返回的结果是否正确，如果正确就做相应的订单更新。
+</li>
+</ol>
+</div>
+</li>
+
+<li>实现构造支付链接<br  /><div class="outline-text-5" id="text-1-3-2-2">
+<p>
+注意事项：
+</p>
+<ol class="org-ol">
+<li>传给支付宝的url参数需要字母顺序排序，且不能含有空格，空值。
+</li>
+<li>验证，使用MD5验证，构造除了sign和sign_type的url参数和key做md5。
+</li>
+</ol>
+</div>
+</li>
+
+<li>实现验证支付宝返回数据的验证<br  /><div class="outline-text-5" id="text-1-3-2-3">
+<p>
+验证支付宝请求return_url和notify_url的数据 <br  />
+注意事项
+</p>
+<ol class="org-ol">
+<li>支付宝的notify_id在一分钟后会实效。
+</li>
+<li>支付宝异步请求如果没有收到success的话会间隔发请求，直到获取到success，或者超过24小时。
+</li>
+</ol>
+
+<p>
+代码：
+一个配置类AlipayConfig <br  />
+一个工具类AlipayUtils <br  />
+</p>
+
+<p>
+AlipayConfig代码：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">coding: utf-8</span>
+
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">AlipayConfig</span>(<span style="color: #0000ff; font-weight: bold;">object</span>):
+
+    <span style="color: #ffff00;">ALIPAY_PID</span> = <span style="color: #00ff00;">'your apply pid'</span>
+    <span style="color: #ffff00;">ALIPAY_KEY</span> = <span style="color: #00ff00;">'your apply key'</span>
+
+    <span style="color: #ffff00;">ALIPAY_SELLER_EMAIL</span> = <span style="color: #00ff00;">'your apply email'</span>
+
+    <span style="color: #ffff00;">ALIPAY_INPUT_CHARSET</span> = <span style="color: #00ff00;">'utf-8'</span>
+    <span style="color: #ffff00;">ALIPAY_SIGN_TYPE</span> = <span style="color: #00ff00;">'MD5'</span>
+
+    <span style="color: #ffff00;">ALIPAY_GATEWAY</span> = <span style="color: #00ff00;">'https://mapi.alipay.com/gateway.do?'</span>
+    <span style="color: #ffff00;">ALIPAY_NOTIFY_GATEWAY</span> = <span style="color: #00ff00;">'https://mapi.alipay.com/gateway.do?service=notify_verify&amp;'</span>
+
+    <span style="color: #ffff00;">ALIPAY_RETURN_URL</span> = <span style="color: #00ff00;">'your return url'</span>
+</pre>
+</div>
+
+<p>
+AlipayUtils代码：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">coding: utf-8</span>
+
+<span style="color: #00ffff; font-weight: bold;">import</span> urllib
+<span style="color: #00ffff; font-weight: bold;">import</span> requests
+<span style="color: #00ffff; font-weight: bold;">from</span> hashlib <span style="color: #00ffff; font-weight: bold;">import</span> md5
+<span style="color: #00ffff; font-weight: bold;">from</span> collections <span style="color: #00ffff; font-weight: bold;">import</span> OrderedDict
+
+<span style="color: #00ffff; font-weight: bold;">from</span> alipay_config <span style="color: #00ffff; font-weight: bold;">import</span> AlipayConfig
+
+<span style="color: #00ffff; font-weight: bold;">from</span> Pinbot.settings <span style="color: #00ffff; font-weight: bold;">import</span> DEBUG
+
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">AlipayUtils</span>(<span style="color: #0000ff; font-weight: bold;">object</span>):
+
+    <span style="color: #00ff00;">@classmethod</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">_convert_str_encode</span>(cls, pay_option, encoding=<span style="color: #00ff00;">'utf-8'</span>):
+        <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">       &#23558;unicode&#32534;&#30721;&#36716;&#25442;&#25104;utf-8&#32534;&#30721;</span>
+<span style="color: #00ff00;">        '''</span>
+        <span style="color: #00ffff; font-weight: bold;">for</span> key, value <span style="color: #00ffff; font-weight: bold;">in</span> pay_option.iteritems():
+            <span style="color: #00ffff; font-weight: bold;">if</span> <span style="color: #00ffff; font-weight: bold;">not</span> value:
+                <span style="color: #00ffff; font-weight: bold;">continue</span>
+            <span style="color: #00ffff; font-weight: bold;">if</span> <span style="color: #0000ff; font-weight: bold;">isinstance</span>(value, <span style="color: #0000ff; font-weight: bold;">unicode</span>):
+                <span style="color: #ffff00;">pay_option</span>[key] = value.encode(encoding)
+        <span style="color: #00ffff; font-weight: bold;">return</span> pay_option
+
+    <span style="color: #00ff00;">@classmethod</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">_get_url_params</span>(cls, pay_option):
+        <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">        &#20351;&#29992;OrderedDict&#23558;url&#21442;&#25968;&#25353;&#23383;&#27597;&#39034;&#24207;&#25490;&#24207;</span>
+<span style="color: #00ff00;">        &#21435;&#38500;&#31354;&#30340;&#23383;&#27573;&#21644;sign, sign_type&#23383;&#27573;</span>
+<span style="color: #00ff00;">        '''</span>
+        <span style="color: #ffff00;">url_params</span> = OrderedDict(
+            <span style="color: #0000ff; font-weight: bold;">sorted</span>(
+                [
+                    item <span style="color: #00ffff; font-weight: bold;">for</span> item <span style="color: #00ffff; font-weight: bold;">in</span> pay_option.iteritems()
+                    <span style="color: #00ffff; font-weight: bold;">if</span> item[1] <span style="color: #00ffff; font-weight: bold;">and</span> item[0] <span style="color: #00ffff; font-weight: bold;">not</span> <span style="color: #00ffff; font-weight: bold;">in</span> (<span style="color: #00ff00;">'sign'</span>, <span style="color: #00ff00;">'sign_type'</span>)
+                ],
+                key=<span style="color: #00ffff; font-weight: bold;">lambda</span> x: x[0]
+            )
+        )
+        <span style="color: #00ffff; font-weight: bold;">return</span> url_params
+
+    <span style="color: #00ff00;">@classmethod</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">_get_sign</span>(cls, url_params):
+        <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">        md5&#21152;&#23494;url&#21442;&#25968;&#21644;key</span>
+<span style="color: #00ff00;">        '''</span>
+        <span style="color: #ffff00;">key</span> = AlipayConfig.ALIPAY_KEY
+        <span style="color: #ffff00;">prestr</span> = <span style="color: #00ff00;">'&amp;'</span>.join(<span style="color: #00ff00;">'%s=%s'</span> % item <span style="color: #00ffff; font-weight: bold;">for</span> item <span style="color: #00ffff; font-weight: bold;">in</span> url_params.iteritems())
+        <span style="color: #ffff00;">sign</span> = md5(prestr + key).hexdigest()
+        <span style="color: #00ffff; font-weight: bold;">return</span> sign
+
+    <span style="color: #00ff00;">@classmethod</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">submit_order_url</span>(cls, order):
+        <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">        &#26500;&#36896;&#25903;&#20184;&#23453;&#21363;&#26102;&#21040;&#36134;&#38142;&#25509;</span>
+<span style="color: #00ff00;">        '''</span>
+        <span style="color: #ffff00;">pay_option</span> = <span style="color: #0000ff; font-weight: bold;">dict</span>([
+            (<span style="color: #00ff00;">'service'</span>, <span style="color: #00ff00;">'create_direct_pay_by_user'</span>),
+            (<span style="color: #00ff00;">'payment_type'</span>, <span style="color: #00ff00;">'1'</span>),
+
+            (<span style="color: #00ff00;">'_input_charset'</span>, AlipayConfig.ALIPAY_INPUT_CHARSET),
+            (<span style="color: #00ff00;">'partner'</span>, AlipayConfig.ALIPAY_PID),
+            (<span style="color: #00ff00;">'seller_email'</span>, AlipayConfig.ALIPAY_SELLER_EMAIL),
+            (<span style="color: #00ff00;">'return_url'</span>, AlipayConfig.ALIPAY_RETURN_URL),
+            (<span style="color: #00ff00;">'notify_url'</span>, <span style="color: #00ff00;">''</span>),
+            (<span style="color: #00ff00;">'show_url'</span>, <span style="color: #00ff00;">''</span>),
+
+            (<span style="color: #00ff00;">'out_trade_no'</span>, order.order_id),
+            (<span style="color: #00ff00;">'subject'</span>, order.subject_name()),
+            (<span style="color: #00ff00;">'body'</span>, order.order_detail()),
+            (<span style="color: #00ff00;">'total_fee'</span>, order.total_price <span style="color: #00ffff; font-weight: bold;">if</span> <span style="color: #00ffff; font-weight: bold;">not</span> DEBUG <span style="color: #00ffff; font-weight: bold;">else</span> 0.1),
+        ])
+
+        <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#23558;&#25903;&#20184;&#21442;&#25968;&#30340;&#32534;&#30721;&#32479;&#19968;&#25104;utf-8</span>
+        <span style="color: #ffff00;">pay_option</span> = cls._convert_str_encode(
+            pay_option,
+            encoding=AlipayConfig.ALIPAY_INPUT_CHARSET,
+        )
+
+        <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#25490;&#24207;&#21435;&#38500;&#31354;&#20540;&#21644;sign,sign_type&#36873;&#39033;</span>
+        <span style="color: #ffff00;">url_params</span> = cls._get_url_params(pay_option)
+
+        <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#21152;&#23494;&#21644;&#21152;&#23494;&#31867;&#22411;</span>
+        <span style="color: #ffff00;">url_params</span>[<span style="color: #00ff00;">'sign'</span>] = cls._get_sign(url_params)
+        <span style="color: #ffff00;">url_params</span>[<span style="color: #00ff00;">'sign_type'</span>] = AlipayConfig.ALIPAY_SIGN_TYPE
+
+        <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#29983;&#25104;&#25903;&#20184;url</span>
+        <span style="color: #ffff00;">submit_url</span> = AlipayConfig.ALIPAY_GATEWAY + urllib.urlencode(url_params)
+
+        <span style="color: #00ffff; font-weight: bold;">return</span> submit_url
+
+    <span style="color: #00ff00;">@classmethod</span>
+    <span style="color: #00ffff; font-weight: bold;">def</span> <span style="color: #0000ff; font-weight: bold;">verify_alipay_notify</span>(cls, url_data):
+        <span style="color: #00ff00;">'''</span>
+<span style="color: #00ff00;">        &#39564;&#35777;&#25903;&#20184;&#23453;&#25903;&#20184;&#25104;&#21151;&#30340;&#36820;&#22238;&#20449;&#24687;</span>
+<span style="color: #00ff00;">        &#20004;&#20010;&#27493;&#39588;&#65306;</span>
+<span style="color: #00ff00;">           1. &#39564;&#35777;&#31614;&#21517;</span>
+<span style="color: #00ff00;">           2. &#26597;&#35810;&#27492;notify&#26159;&#21542;&#22312;&#25903;&#20184;&#23453;&#20013;&#26377;&#25928;</span>
+<span style="color: #00ff00;">        '''</span>
+        <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#39564;&#35777;&#31614;&#21517;</span>
+        <span style="color: #ffff00;">alipay_sign</span> = url_data.get(<span style="color: #00ff00;">'sign'</span>)
+        <span style="color: #ffff00;">alipay_url_params</span> = cls._get_url_params(url_data)
+        <span style="color: #ffff00;">sign</span> = cls._get_sign(alipay_url_params)
+
+        <span style="color: #00ffff; font-weight: bold;">if</span> sign != alipay_sign:
+            <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #ff00ff;">False</span>
+
+        <span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#26597;&#35810;&#20449;&#24687;&#26159;&#21542;&#22312;&#25903;&#20184;&#23453;&#20013;&#26377;&#25928;</span>
+        <span style="color: #ffff00;">check_params</span> = {
+            <span style="color: #00ff00;">'partner'</span>: AlipayConfig.ALIPAY_PID,
+            <span style="color: #00ff00;">'notify_id'</span>: url_data.get(<span style="color: #00ff00;">'notify_id'</span>)
+        }
+        <span style="color: #ffff00;">result</span> = requests.get(
+            AlipayConfig.ALIPAY_NOTIFY_GATEWAY,
+            params=check_params
+        )
+        <span style="color: #00ffff; font-weight: bold;">if</span> result.text.lower().strip() == <span style="color: #00ff00;">'true'</span>:
+            <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #ff00ff;">True</span>
+
+        <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #ff00ff;">False</span>
+</pre>
+</div>
+
+<p>
+一些运行结果:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#29983;&#25104;&#25903;&#20184;&#30340;url</span>
+https://mapi.alipay.com/gateway.do?<span style="color: #ffff00;">_input_charset</span>=utf-8&amp;<span style="color: #ffff00;">body</span>=hehehehhe&amp;<span style="color: #ffff00;">out_trade_no</span>=20140928110814-8cd3
+&amp;<span style="color: #ffff00;">partner</span>=xxxxx&amp;<span style="color: #ffff00;">payment_type</span>=1&amp;<span style="color: #ffff00;">paymenthod</span>=directPay&amp;<span style="color: #ffff00;">seller_email</span>=xxx%40xxx.com&amp;
+<span style="color: #ffff00;">service</span>=create_direct_pay_by_user&amp;<span style="color: #ffff00;">subject</span>=hehehe&amp;<span style="color: #ffff00;">total_fee</span>=2599&amp;<span style="color: #ffff00;">sign</span>=603b228b7e6663d217dc44bdc12a5106&amp;
+<span style="color: #ffff00;">sign_type</span>=MD5
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">&#25903;&#20184;&#23453;&#36820;&#22238;&#25968;&#25454;&#30340;url</span>
+127.0.0.1:8000/payment/alipay_return/?<span style="color: #ffff00;">body</span>=&#22871;&#39184;B&amp;<span style="color: #ffff00;">buyer_email</span>=xxxx%40163.com&amp;<span style="color: #ffff00;">buyer_id</span>=xxxxxxx&amp;
+<span style="color: #ffff00;">exterface</span>=create_direct_pay_by_user&amp;<span style="color: #ffff00;">is_success</span>=T&amp;
+<span style="color: #ffff00;">notify_id</span>=RqPnCoPT3K9%252Fvwbh3InQ9JC%252Ft24wOkxbC3d3NsqzK9v6KWsnZ2vWqks9o41CFgeCkbai&amp;
+<span style="color: #ffff00;">notify_time</span>=2014-09-30+14%3A21%3A22&amp;<span style="color: #ffff00;">notify_type</span>=trade_status_sync&amp;<span style="color: #ffff00;">out_trade_no</span>=20140928110814-8cd4&amp;
+<span style="color: #ffff00;">payment_type</span>=1&amp;<span style="color: #ffff00;">seller_email</span>=xxx%40xxxx.com&amp;<span style="color: #ffff00;">seller_id</span>=xxxx&amp;<span style="color: #ffff00;">subject</span>=&#22871;&#39184;B&amp;<span style="color: #ffff00;">total_fee</span>=0.10&amp;
+<span style="color: #ffff00;">trade_no</span>=2014093000715684&amp;<span style="color: #ffff00;">trade_status</span>=TRADE_SUCCESS&amp;<span style="color: #ffff00;">sign</span>=de81410e5fba18e8d97823a31c0724ac&amp;<span style="color: #ffff00;">sign_type</span>=MD5
+</pre>
+</div>
+</div>
+</li></ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">总结：</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+支付宝的文档确实有点看不懂，上面放了两个运行结果，希望大家做起来有点方向，知道构造什么，验证什么，<br  />
+感谢github上<a href="https:github.com/yefei/python-alipay">这个repo</a>, 给了我很大的帮助。
+</p>
+
+<p>
+<!-- more -->
+</p>
+</div>
+</div>
+</div>

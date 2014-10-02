@@ -1,0 +1,215 @@
+#+TITLE: Python使用支付宝接口
+#+DATE: 2014-10-02
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: [Python, Alipay]
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* Python使用支付宝接口
+
+
+** 来源
+[[www.pinbot.me][www.pinbot.me]]需要支持线上支付，先从支持支付宝开始。
+
+** 使用支付宝什么接口
+支付宝接口有很多，而线上支付使用的是即时到账接口，这里有[[https://b.alipay.com/order/productDetail.htm?productId%3D2012111200373124&tabId%3D1#ps-tabinfo-hash][官方介绍]]
+
+** 如何使用该接口
+实现代码参考了[[https://github.com/yefei/python-alipay][python-alipay]]
+
+*** 获取PID和32位KEY
+只能是企业才能申请该接口的使用，实名认证通过后，你只要拿到PID和KEY \\
+就行了。
+
+*** 使用该接口
+**** 使用该接口需要实现两个工具函数:
+1. 构造支付宝的支付链接，如果链接请求成功会生存支付宝的支付页面。
+2. 支付成功后需要验证支付宝返回的结果是否正确，如果正确就做相应的订单更新。
+
+**** 实现构造支付链接
+注意事项：
+1. 传给支付宝的url参数需要字母顺序排序，且不能含有空格，空值。
+2. 验证，使用MD5验证，构造除了sign和sign_type的url参数和key做md5。
+
+**** 实现验证支付宝返回数据的验证
+验证支付宝请求return_url和notify_url的数据 \\
+注意事项
+1. 支付宝的notify_id在一分钟后会实效。
+2. 支付宝异步请求如果没有收到success的话会间隔发请求，直到获取到success，或者超过24小时。
+
+代码：
+一个配置类AlipayConfig \\
+一个工具类AlipayUtils \\
+
+AlipayConfig代码：
+#+BEGIN_SRC python
+# coding: utf-8
+
+
+class AlipayConfig(object):
+
+    ALIPAY_PID = 'your apply pid'
+    ALIPAY_KEY = 'your apply key'
+
+    ALIPAY_SELLER_EMAIL = 'your apply email'
+
+    ALIPAY_INPUT_CHARSET = 'utf-8'
+    ALIPAY_SIGN_TYPE = 'MD5'
+
+    ALIPAY_GATEWAY = 'https://mapi.alipay.com/gateway.do?'
+    ALIPAY_NOTIFY_GATEWAY = 'https://mapi.alipay.com/gateway.do?service=notify_verify&'
+
+    ALIPAY_RETURN_URL = 'your return url'
+
+#+END_SRC
+
+AlipayUtils代码：
+#+BEGIN_SRC python
+# coding: utf-8
+
+import urllib
+import requests
+from hashlib import md5
+from collections import OrderedDict
+
+from alipay_config import AlipayConfig
+
+from Pinbot.settings import DEBUG
+
+
+class AlipayUtils(object):
+
+    @classmethod
+    def _convert_str_encode(cls, pay_option, encoding='utf-8'):
+        '''
+       将unicode编码转换成utf-8编码
+        '''
+        for key, value in pay_option.iteritems():
+            if not value:
+                continue
+            if isinstance(value, unicode):
+                pay_option[key] = value.encode(encoding)
+        return pay_option
+
+    @classmethod
+    def _get_url_params(cls, pay_option):
+        '''
+        使用OrderedDict将url参数按字母顺序排序
+        去除空的字段和sign, sign_type字段
+        '''
+        url_params = OrderedDict(
+            sorted(
+                [
+                    item for item in pay_option.iteritems()
+                    if item[1] and item[0] not in ('sign', 'sign_type')
+                ],
+                key=lambda x: x[0]
+            )
+        )
+        return url_params
+
+    @classmethod
+    def _get_sign(cls, url_params):
+        '''
+        md5加密url参数和key
+        '''
+        key = AlipayConfig.ALIPAY_KEY
+        prestr = '&'.join('%s=%s' % item for item in url_params.iteritems())
+        sign = md5(prestr + key).hexdigest()
+        return sign
+
+    @classmethod
+    def submit_order_url(cls, order):
+        '''
+        构造支付宝即时到账链接
+        '''
+        pay_option = dict([
+            ('service', 'create_direct_pay_by_user'),
+            ('payment_type', '1'),
+
+            ('_input_charset', AlipayConfig.ALIPAY_INPUT_CHARSET),
+            ('partner', AlipayConfig.ALIPAY_PID),
+            ('seller_email', AlipayConfig.ALIPAY_SELLER_EMAIL),
+            ('return_url', AlipayConfig.ALIPAY_RETURN_URL),
+            ('notify_url', ''),
+            ('show_url', ''),
+
+            ('out_trade_no', order.order_id),
+            ('subject', order.subject_name()),
+            ('body', order.order_detail()),
+            ('total_fee', order.total_price if not DEBUG else 0.1),
+        ])
+
+        # 将支付参数的编码统一成utf-8
+        pay_option = cls._convert_str_encode(
+            pay_option,
+            encoding=AlipayConfig.ALIPAY_INPUT_CHARSET,
+        )
+
+        # 排序去除空值和sign,sign_type选项
+        url_params = cls._get_url_params(pay_option)
+
+        # 加密和加密类型
+        url_params['sign'] = cls._get_sign(url_params)
+        url_params['sign_type'] = AlipayConfig.ALIPAY_SIGN_TYPE
+
+        # 生成支付url
+        submit_url = AlipayConfig.ALIPAY_GATEWAY + urllib.urlencode(url_params)
+
+        return submit_url
+
+    @classmethod
+    def verify_alipay_notify(cls, url_data):
+        '''
+        验证支付宝支付成功的返回信息
+        两个步骤：
+           1. 验证签名
+           2. 查询此notify是否在支付宝中有效
+        '''
+        # 验证签名
+        alipay_sign = url_data.get('sign')
+        alipay_url_params = cls._get_url_params(url_data)
+        sign = cls._get_sign(alipay_url_params)
+
+        if sign != alipay_sign:
+            return False
+
+        # 查询信息是否在支付宝中有效
+        check_params = {
+            'partner': AlipayConfig.ALIPAY_PID,
+            'notify_id': url_data.get('notify_id')
+        }
+        result = requests.get(
+            AlipayConfig.ALIPAY_NOTIFY_GATEWAY,
+            params=check_params
+        )
+        if result.text.lower().strip() == 'true':
+            return True
+
+        return False
+#+END_SRC
+
+一些运行结果:
+#+BEGIN_SRC python
+# 生成支付的url
+https://mapi.alipay.com/gateway.do?_input_charset=utf-8&body=hehehehhe&out_trade_no=20140928110814-8cd3
+&partner=xxxxx&payment_type=1&paymenthod=directPay&seller_email=xxx%40xxx.com&
+service=create_direct_pay_by_user&subject=hehehe&total_fee=2599&sign=603b228b7e6663d217dc44bdc12a5106&
+sign_type=MD5
+
+# 支付宝返回数据的url
+127.0.0.1:8000/payment/alipay_return/?body=套餐B&buyer_email=xxxx%40163.com&buyer_id=xxxxxxx&
+exterface=create_direct_pay_by_user&is_success=T&
+notify_id=RqPnCoPT3K9%252Fvwbh3InQ9JC%252Ft24wOkxbC3d3NsqzK9v6KWsnZ2vWqks9o41CFgeCkbai&
+notify_time=2014-09-30+14%3A21%3A22&notify_type=trade_status_sync&out_trade_no=20140928110814-8cd4&
+payment_type=1&seller_email=xxx%40xxxx.com&seller_id=xxxx&subject=套餐B&total_fee=0.10&
+trade_no=2014093000715684&trade_status=TRADE_SUCCESS&sign=de81410e5fba18e8d97823a31c0724ac&sign_type=MD5
+
+#+END_SRC
+
+** 总结：
+支付宝的文档确实有点看不懂，上面放了两个运行结果，希望大家做起来有点方向，知道构造什么，验证什么，\\
+感谢github上[[https://github.com/yefei/python-alipay][这个repo]], 给了我很大的帮助。
+
+{{{more}}}

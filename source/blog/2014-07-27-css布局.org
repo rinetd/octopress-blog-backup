@@ -1,0 +1,16 @@
+#+TITLE: CSS布局
+#+DATE: 2014-07-27
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES:
+#+JEKYLL_PUBLISHED: false
+#+JEKYLL_COMMENTS: true
+
+* CSS布局
+
+** 核心
+所有的CSS布局技术的根本都是3个基本概念：定位、浮动、和外边距操纵。
+
+** 思想
+
+{{{more}}}
