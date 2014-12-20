@@ -1,0 +1,106 @@
+#+TITLE: Angular.js入门参考
+#+DATE: 2014-12-20
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: Angular
+#+JEKYLL_PUBLISHED: false
+#+JEKYLL_COMMENTS: true
+
+* Angular.js 入门参考
+
+** 来源
+很早听说这个前端MV*框架，最近公司的一个新项目未来可能需要支持手机App，所以决定\\
+使用API驱动的设计，也就是网站后端只提供API，逻辑处理由前端实现，也就是Angular这些\\
+前端框架要做的事情了，以后如果上手机App的话也可以使用同一套API，不用单独为手机App\\
+开发新的API。
+
+** 前端MV*是什么？
+MV* 可以是MVC(Model, View, Controller)模式，也可以是MVVM(Model, View, ViewModel)\\
+你可以把Angular用成你想要的模式，而MVVM正是我项目里面想要的东西，Model和UI的双向绑定\\
+也就是Model变化UI相应的改变，UI改变Model也跟着改变。
+
+** Angular的使用场景和优缺点
+
+*** 使用场景
+Single Page Application(单页面应用)，即MVVM模式发挥优势的地方。
+
+*** 优点
++ 使Javascript开发变得模块化。
++ 保证开发人员的代码风格统一。
++ 资源相对较多，上手相对简单。
+
+*** 缺点
++ 调试很困难
+
+** Angular 基本概念
+1. Directive(指令)
+2. Scope(变量空间)
+3. Service(服务)
+4. Controller(控制器)
+5. Module(模块)
+
+*** Directive
+Angular指令，如ng-app, ng-controller, ng-model, ng-repeat等等。
+
+*** Scope
+Controller可以访问的变量空间。
+
+*** Service
+服务，如Http，window，element等服务，可以自定义公用的服务，达到模块化管理的目的。
+
+*** Controller
+View的控制模块。
+
+*** Module
+模块，要使用Angular必须先初始化模块
+
+** 实例
+index.html
+#+BEGIN_SRC html
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Document</title>
+    </head>
+    <!-- 使用directive初始化app -->
+    <body ng-app="app">
+        <!-- 添加controller -->
+        <div ng-controller="loginCtrl">
+             <!-- 使用ng-model绑定username和input, 两者只要有一个改变都会进行相应的改变 -->
+             <input ng-model="username" name="username" type="text"/>
+             <input ng-model="password" name="username" type="password"/>
+             <!-- controller里面添加相应的函数 -->
+             <a href ng-click="login()">登录</a>
+        </div>
+    </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.7/angular.min.js"></script>
+</html>
+#+END_SRC
+
+app.js
+#+BEGIN_SRC javascript
+(function() {
+    // 初始化App
+    var app = angular.module('app', []);
+
+    // 添加Controller
+    app.controller(
+        'loginCtrl',
+        // 依赖注入使用服务 $scope 和 $http
+        ['$scope', '$http', function($scope, $http) {
+            // 添加登录处理函数
+            $scope.login = function() {
+                $http.post('/login/', {username: $scope.username, password: $scope.password}).success(function(data) {
+                    alert(data.msg);
+                });
+            }
+        }]
+    );
+})();
+#+END_SRC
+
+** 总结
+本篇提供angular的入门，后续会有一些使用心得，总体来说angular上手还是很简单的。
+
+{{{more}}}

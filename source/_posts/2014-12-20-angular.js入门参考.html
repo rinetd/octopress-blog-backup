@@ -1,0 +1,206 @@
+---
+title: "[PREVIEW] Angular.js入门参考"
+date: 2014-12-20
+layout: post
+categories: Angular
+published: false
+comments: true
+---
+<span style="background: red;">PREVIEW</span>
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Angular.js 入门参考</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">来源</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+很早听说这个前端MV*框架，最近公司的一个新项目未来可能需要支持手机App，所以决定<br  />
+使用API驱动的设计，也就是网站后端只提供API，逻辑处理由前端实现，也就是Angular这些<br  />
+前端框架要做的事情了，以后如果上手机App的话也可以使用同一套API，不用单独为手机App<br  />
+开发新的API。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">前端MV*是什么？</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+MV* 可以是MVC(Model, View, Controller)模式，也可以是MVVM(Model, View, ViewModel)<br  />
+你可以把Angular用成你想要的模式，而MVVM正是我项目里面想要的东西，Model和UI的双向绑定<br  />
+也就是Model变化UI相应的改变，UI改变Model也跟着改变。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">Angular的使用场景和优缺点</h3>
+<div class="outline-text-3" id="text-1-3">
+</div><div id="outline-container-sec-1-3-1" class="outline-4">
+<h4 id="sec-1-3-1">使用场景</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<p>
+Single Page Application(单页面应用)，即MVVM模式发挥优势的地方。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-2" class="outline-4">
+<h4 id="sec-1-3-2">优点</h4>
+<div class="outline-text-4" id="text-1-3-2">
+<ul class="org-ul">
+<li>使Javascript开发变得模块化。
+</li>
+<li>保证开发人员的代码风格统一。
+</li>
+<li>资源相对较多，上手相对简单。
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-3" class="outline-4">
+<h4 id="sec-1-3-3">缺点</h4>
+<div class="outline-text-4" id="text-1-3-3">
+<ul class="org-ul">
+<li>调试很困难
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">Angular 基本概念</h3>
+<div class="outline-text-3" id="text-1-4">
+<ol class="org-ol">
+<li>Directive(指令)
+</li>
+<li>Scope(变量空间)
+</li>
+<li>Service(服务)
+</li>
+<li>Controller(控制器)
+</li>
+<li>Module(模块)
+</li>
+</ol>
+</div>
+
+<div id="outline-container-sec-1-4-1" class="outline-4">
+<h4 id="sec-1-4-1">Directive</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<p>
+Angular指令，如ng-app, ng-controller, ng-model, ng-repeat等等。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4-2" class="outline-4">
+<h4 id="sec-1-4-2">Scope</h4>
+<div class="outline-text-4" id="text-1-4-2">
+<p>
+Controller可以访问的变量空间。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4-3" class="outline-4">
+<h4 id="sec-1-4-3">Service</h4>
+<div class="outline-text-4" id="text-1-4-3">
+<p>
+服务，如Http，window，element等服务，可以自定义公用的服务，达到模块化管理的目的。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4-4" class="outline-4">
+<h4 id="sec-1-4-4">Controller</h4>
+<div class="outline-text-4" id="text-1-4-4">
+<p>
+View的控制模块。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4-5" class="outline-4">
+<h4 id="sec-1-4-5">Module</h4>
+<div class="outline-text-4" id="text-1-4-5">
+<p>
+模块，要使用Angular必须先初始化模块
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5">实例</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+index.html
+</p>
+<div class="org-src-container">
+
+<pre class="src src-html">&lt;<span style="color: #00ffff; font-weight: bold;">!doctype</span> html&gt;
+&lt;<span style="color: #0000ff; font-weight: bold;">html</span> <span style="color: #ffff00;">lang</span>=<span style="color: #00ff00;">"en"</span>&gt;
+    &lt;<span style="color: #0000ff; font-weight: bold;">head</span>&gt;
+        &lt;<span style="color: #0000ff; font-weight: bold;">meta</span> <span style="color: #ffff00;">charset</span>=<span style="color: #00ff00;">"UTF-8"</span>/&gt;
+        &lt;<span style="color: #0000ff; font-weight: bold;">title</span>&gt;<span style="font-weight: bold; text-decoration: underline;">Document</span>&lt;/<span style="color: #0000ff; font-weight: bold;">title</span>&gt;
+    &lt;/<span style="color: #0000ff; font-weight: bold;">head</span>&gt;
+    <span style="color: #ff0000;">&lt;!-- </span><span style="color: #ff0000;">&#20351;&#29992;directive&#21021;&#22987;&#21270;app </span><span style="color: #ff0000;">--&gt;</span>
+    &lt;<span style="color: #0000ff; font-weight: bold;">body</span> <span style="color: #ffff00;">ng-app</span>=<span style="color: #00ff00;">"app"</span>&gt;
+        <span style="color: #ff0000;">&lt;!-- </span><span style="color: #ff0000;">&#28155;&#21152;controller </span><span style="color: #ff0000;">--&gt;</span>
+        &lt;<span style="color: #0000ff; font-weight: bold;">div</span> <span style="color: #ffff00;">ng-controller</span>=<span style="color: #00ff00;">"loginCtrl"</span>&gt;
+             <span style="color: #ff0000;">&lt;!-- </span><span style="color: #ff0000;">&#20351;&#29992;ng-model&#32465;&#23450;username&#21644;input, &#20004;&#32773;&#21482;&#35201;&#26377;&#19968;&#20010;&#25913;&#21464;&#37117;&#20250;&#36827;&#34892;&#30456;&#24212;&#30340;&#25913;&#21464; </span><span style="color: #ff0000;">--&gt;</span>
+             &lt;<span style="color: #0000ff; font-weight: bold;">input</span> <span style="color: #ffff00;">ng-model</span>=<span style="color: #00ff00;">"username"</span> <span style="color: #ffff00;">name</span>=<span style="color: #00ff00;">"username"</span> <span style="color: #ffff00;">type</span>=<span style="color: #00ff00;">"text"</span>/&gt;
+             &lt;<span style="color: #0000ff; font-weight: bold;">input</span> <span style="color: #ffff00;">ng-model</span>=<span style="color: #00ff00;">"password"</span> <span style="color: #ffff00;">name</span>=<span style="color: #00ff00;">"username"</span> <span style="color: #ffff00;">type</span>=<span style="color: #00ff00;">"password"</span>/&gt;
+             <span style="color: #ff0000;">&lt;!-- </span><span style="color: #ff0000;">controller&#37324;&#38754;&#28155;&#21152;&#30456;&#24212;&#30340;&#20989;&#25968; </span><span style="color: #ff0000;">--&gt;</span>
+             &lt;<span style="color: #0000ff; font-weight: bold;">a</span> href <span style="color: #ffff00;">ng-click</span>=<span style="color: #00ff00;">"login()"</span>&gt;&#30331;&#24405;&lt;/<span style="color: #0000ff; font-weight: bold;">a</span>&gt;
+        &lt;/<span style="color: #0000ff; font-weight: bold;">div</span>&gt;
+    &lt;/<span style="color: #0000ff; font-weight: bold;">body</span>&gt;
+    &lt;<span style="color: #0000ff; font-weight: bold;">script</span> <span style="color: #ffff00;">src</span>=<span style="color: #00ff00;">"https://ajax.googleapis.com/ajax/libs/angularjs/1.3.7/angular.min.js"</span>&gt;&lt;/<span style="color: #0000ff; font-weight: bold;">script</span>&gt;
+&lt;/<span style="color: #0000ff; font-weight: bold;">html</span>&gt;
+</pre>
+</div>
+
+<p>
+app.js
+</p>
+<div class="org-src-container">
+
+<pre class="src src-javascript">(<span style="color: #00ffff; font-weight: bold;">function</span>() {
+    <span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#21021;&#22987;&#21270;App</span>
+    <span style="color: #00ffff; font-weight: bold;">var</span> <span style="color: #ffff00;">app</span> = angular.module(<span style="color: #00ff00;">'app'</span>, []);
+
+    <span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#28155;&#21152;Controller</span>
+    app.controller(
+        <span style="color: #00ff00;">'loginCtrl'</span>,
+        <span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#20381;&#36182;&#27880;&#20837;&#20351;&#29992;&#26381;&#21153; $scope &#21644; $http</span>
+        [<span style="color: #00ff00;">'$scope'</span>, <span style="color: #00ff00;">'$http'</span>, <span style="color: #00ffff; font-weight: bold;">function</span>(<span style="color: #ffff00;">$scope</span>, <span style="color: #ffff00;">$http</span>) {
+            <span style="color: #ff0000;">// </span><span style="color: #ff0000;">&#28155;&#21152;&#30331;&#24405;&#22788;&#29702;&#20989;&#25968;</span>
+            $scope.login = <span style="color: #00ffff; font-weight: bold;">function</span>() {
+                $http.post(<span style="color: #00ff00;">'/login/'</span>, {username: $scope.username, password: $scope.password}).success(<span style="color: #00ffff; font-weight: bold;">function</span>(<span style="color: #ffff00;">data</span>) {
+                    alert(data.msg);
+                });
+            }
+        }]
+    );
+})();
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6" class="outline-3">
+<h3 id="sec-1-6">总结</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+本篇提供angular的入门，后续会有一些使用心得，总体来说angular上手还是很简单的。
+</p>
+
+<p>
+<!-- more -->
+</p>
+</div>
+</div>
+</div>
