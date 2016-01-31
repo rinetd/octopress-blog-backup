@@ -1,0 +1,48 @@
+#+TITLE: uwsgi部署Django服务的坑
+#+DATE: 2016-01-31
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: [uwsgi, django]
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* uwsgi部署Django服务
+
+** 部署Django的方式
+- gunicorn + Nginx
+- uwsgi + Nginx
+
+*** gunicorn + Nginx
+http://gunicorn.org 最大的好处就是部署简单，如果没有特殊要求，推荐使用这种方式部署Python Web程序
+
+*** uwsgi + Nginx
+uwsgi 相对 gunicorn来说配置选项相对复杂，但是uwsgi是支持websocket的，出于这个原因选择uwsgi来部署django程序
+
+**** 问题1：uwsgi的默认监听进程的数量100
+解决： 之前由于只知道启动uwsgi worker的数量，不管怎么调worker的数量，并发都很低，\\
+配置listen参数解决，根据服务器配置和访问来决定，目前我开的是20000
+
+**** 问题2：supervisor没有办法优雅的重启uwsgi worker，导致服务器资源被重启的uwsgi进程占满
+解决：配置no-orphans参数
+
+**** 配置范例
+#+BEGIN_SRC ini
+master = true
+processes = 8
+thread = 100
+thread-stacksize = 512
+stats = 127.0.0.1:9194
+buffer-size = 65535
+enable-threads = true
+http-timeout = 60
+socket-timeout = 60
+pp = /home/deploy/Pinbot
+module = Pinbot.wsgi
+chmod-socket = 666
+harakiri = 60
+max-requests = 20000
+listen = 20000
+no-orphans
+#+END_SRC
+
+{{{more}}}
