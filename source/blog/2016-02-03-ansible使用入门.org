@@ -1,0 +1,149 @@
+#+TITLE: Ansible使用入门
+#+DATE: 2016-02-03
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: [运维, Ansible]
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* Ansible使用入门
+
+** 背景
+由于经常有部署新服务器的需求，服务器部署过程中的配置和基础环境的安装很多都是重复性的\\
+工作，所以使用配置管理工具将这些重复性的工作控制起来最合适不过了，之前有写过一篇用[[https:////docs.saltstack.com/en/latest/][SaltStack]]\\
+做自动化运维的文章http:////runforever.github.io/blog/2014-06-21-salt使用笔记.html, 这次\\
+换用[[http:////docs.ansible.com][Ansible]] ，顺便比较一下两种工具。
+
+** 选用Ansible的原因
+1. 轻量级
+2. 通过SSH下发命令
+
+** 如何开始
+目录结构
+#+BEGIN_SRC bash
+.
+--hosts    # 服务器地址和组，以下的是配置
+├── config
+│   ├── kernel
+│   ├── tmux
+│   └── vim
+├── deploy
+│   └── project1
+│   └── project2
+├── docker
+│   └── fig_config
+│       ├── common
+│       ├── mongo
+│       ├── mysql
+│       ├── nginx
+│       ├── rabbitmq
+│       └── redis
+├── env
+├── iptables
+├── nginx
+└── ssh
+#+END_SRC
+
+首先配置好hosts文件, 格式:
+#+BEGIN_SRC ini
+; ansible hosts file user .ini format
+; group
+; [test]
+; ip address
+
+; service ip address
+; 127.0.0.1
+#+END_SRC
+
+将上面的注释去掉，IP地址改成服务器地址，并且在服务器上加上本地的ssh 公钥，执行下面命令:
+#+BEGIN_SRC bash
+# 导入环境变量
+export ANSIBLE_HOSTS=/hosts_file_direcory/hosts
+
+# 测试服务器连通
+ansible all -m ping
+# 如果没有问题服务器应该会返回 pong
+#+END_SRC
+
+** 配置文件格式
+连接服务器没有问题的话，就可以使用写playbook(配置管理文件)来管理服务器了。\\
+Ansible的配置文件使用的yaml格式，例子如下：
+#+BEGIN_SRC yaml
+# -------- basic env: init-env.yml -------------
+# install basic env tool task
+- name: install pkg
+  apt: pkg={{ item  }} state=present update_cache=yes
+  with_items:
+    - gcc
+    - g++
+    - curl
+    - tmux
+    - python-dev
+    - python-setuptools
+    - python-pip
+    - htop
+    - zsh
+    - software-properties-common
+    - python-software-properties
+    - libpq-dev
+    - build-essential
+    - libmysqlclient-dev
+    - libevent-dev
+    - git
+    - wget
+    - mc
+
+# install python lib task
+- name: install python pkg
+  pip: name={{ item }}
+  with_items:
+    - fabric
+    - virtualenvwrapper
+    - ipython
+    - ipdb
+    - supervisor
+    - fig
+
+# add user task
+- name: add deploy user
+  user: name=deploy shell=/bin/zsh append=yes
+
+# ----- web basic env: web_env.yml -------
+---
+- hosts: your_web_hosts
+  remote_user: root
+
+  tasks:
+    - include: init-env.yml
+    - name: init web dir
+      file: path=/data owner=root group=root state=directory mode=0755
+
+#+END_SRC
+
+运行
+#+BEGIN_SRC bash
+# 对服务器执行初始化命令
+ansible-playbook init_env.yml
+#+END_SRC
+
+** 常用命令
+#+BEGIN_SRC bash
+# 对所用服务器web_hosts执行初始化命令
+ansible-playbook web_env.yml
+
+# 指定服务器
+ansible-playbook web_env.yml --limit web_hosts
+
+# 调试(Dry Run)
+ansible-playbook web_env.yml --check
+#+END_SRC
+
+** 整理出来的开源库参考
+https:////github.com/runforever/Auto
+
+** 总结
+Ansible对于我来说最大的有点就是使用ssh来执行命令，而SaltStack则需要在机器上安装客户端\\
+其次Ansible由于设计的时候就考虑了监控和图形化，可视化做的不错，如果大家在考虑选择Ansible\\
+还是SaltStack，个人推荐使用Ansible
+
+{{{more}}}

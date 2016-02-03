@@ -1,0 +1,213 @@
+---
+title: "Ansible使用入门"
+date: 2016-02-03
+layout: post
+categories: [运维, Ansible]
+published: true
+comments: true
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Ansible使用入门</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">背景</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+由于经常有部署新服务器的需求，服务器部署过程中的配置和基础环境的安装很多都是重复性的<br  />
+工作，所以使用配置管理工具将这些重复性的工作控制起来最合适不过了，之前有写过一篇用<a href="https://docs.saltstack.com/en/latest/">SaltStack</a><br  />
+做自动化运维的文章<a href="http://runforever.github.io/blog/2014-06-21-salt%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0.html">http://runforever.github.io/blog/2014-06-21-salt%E4%BD%BF%E7%94%A8%E7%AC%94%E8%AE%B0.html</a>, 这次<br  />
+换用<a href="http://docs.ansible.com">Ansible</a> ，顺便比较一下两种工具。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">选用Ansible的原因</h3>
+<div class="outline-text-3" id="text-1-2">
+<ol class="org-ol">
+<li>轻量级
+</li>
+<li>通过SSH下发命令
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">如何开始</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+目录结构
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">.
+--hosts    # 服务器地址和组，以下的是配置
+├── config
+│   ├── kernel
+│   ├── tmux
+│   └── vim
+├── deploy
+│   └── project1
+│   └── project2
+├── docker
+│   └── fig_config
+│       ├── common
+│       ├── mongo
+│       ├── mysql
+│       ├── nginx
+│       ├── rabbitmq
+│       └── redis
+├── env
+├── iptables
+├── nginx
+└── ssh
+</pre>
+</div>
+
+<p>
+首先配置好hosts文件, 格式:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-ini">; ansible hosts file user .ini format
+; group
+; [test]
+; ip address
+
+; service ip address
+; 127.0.0.1
+</pre>
+</div>
+
+<p>
+将上面的注释去掉，IP地址改成服务器地址，并且在服务器上加上本地的ssh 公钥，执行下面命令:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash"># 导入环境变量
+export ANSIBLE_HOSTS=/hosts_file_direcory/hosts
+
+# 测试服务器连通
+ansible all -m ping
+# 如果没有问题服务器应该会返回 pong
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">配置文件格式</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+连接服务器没有问题的话，就可以使用写playbook(配置管理文件)来管理服务器了。<br  />
+Ansible的配置文件使用的yaml格式，例子如下：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-yaml"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">-------- </span><span style="color: #ffff00;">basic env</span><span style="color: #ff0000;">: init-env.yml -------------</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">install basic env tool task</span>
+- <span style="color: #ffff00;">name</span>: install pkg
+  <span style="color: #ffff00;">apt</span>: pkg={{ item  }} state=present update_cache=yes
+  <span style="color: #ffff00;">with_items</span>:
+    - gcc
+    - g++
+    - curl
+    - tmux
+    - python-dev
+    - python-setuptools
+    - python-pip
+    - htop
+    - zsh
+    - software-properties-common
+    - python-software-properties
+    - libpq-dev
+    - build-essential
+    - libmysqlclient-dev
+    - libevent-dev
+    - git
+    - wget
+    - mc
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">install python lib task</span>
+- <span style="color: #ffff00;">name</span>: install python pkg
+  <span style="color: #ffff00;">pip</span>: name={{ item }}
+  <span style="color: #ffff00;">with_items</span>:
+    - fabric
+    - virtualenvwrapper
+    - ipython
+    - ipdb
+    - supervisor
+    - fig
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">add user task</span>
+- <span style="color: #ffff00;">name</span>: add deploy user
+  <span style="color: #ffff00;">user</span>: name=deploy shell=/bin/zsh append=yes
+
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">----- </span><span style="color: #ffff00;">web basic env</span><span style="color: #ff0000;">: web_env.yml -------</span>
+<span style="color: #ff0000;">---</span>
+- <span style="color: #ffff00;">hosts</span>: your_web_hosts
+  <span style="color: #ffff00;">remote_user</span>: root
+
+  <span style="color: #ffff00;">tasks</span>:
+    - <span style="color: #ffff00;">include</span>: init-env.yml
+    - <span style="color: #ffff00;">name</span>: init web dir
+      <span style="color: #ffff00;">file</span>: path=/data owner=root group=root state=directory mode=0755
+</pre>
+</div>
+
+<p>
+运行
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash"># 对服务器执行初始化命令
+ansible-playbook init_env.yml
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5">常用命令</h3>
+<div class="outline-text-3" id="text-1-5">
+<div class="org-src-container">
+
+<pre class="src src-bash"># 对所用服务器web_hosts执行初始化命令
+ansible-playbook web_env.yml
+
+# 指定服务器
+ansible-playbook web_env.yml --limit web_hosts
+
+# 调试(Dry Run)
+ansible-playbook web_env.yml --check
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-6" class="outline-3">
+<h3 id="sec-1-6">整理出来的开源库参考</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+<a href="https://github.com/runforever/Auto">https://github.com/runforever/Auto</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-7" class="outline-3">
+<h3 id="sec-1-7">总结</h3>
+<div class="outline-text-3" id="text-1-7">
+<p>
+Ansible对于我来说最大的有点就是使用ssh来执行命令，而SaltStack则需要在机器上安装客户端<br  />
+其次Ansible由于设计的时候就考虑了监控和图形化，可视化做的不错，如果大家在考虑选择Ansible<br  />
+还是SaltStack，个人推荐使用Ansible
+</p>
+
+<p>
+<!-- more -->
+</p>
+</div>
+</div>
+</div>
