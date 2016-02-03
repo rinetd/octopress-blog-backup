@@ -9,9 +9,9 @@
 * Ansible使用入门
 
 ** 背景
-由于经常有部署新服务器的需求，服务器部署过程中的配置和基础环境的安装很多都是重复性的\\
-工作，所以使用配置管理工具将这些重复性的工作控制起来最合适不过了，之前有写过一篇用[[https:////docs.saltstack.com/en/latest/][SaltStack]]\\
-做自动化运维的文章http:////runforever.github.io/blog/2014-06-21-salt使用笔记.html, 这次\\
+由于经常有部署新服务器的需求，服务器部署过程中的配置和基础环境的安装很多都是重复性的
+工作，所以使用配置管理工具将这些重复性的工作控制起来最合适不过了，之前有写过一篇用[[https:////docs.saltstack.com/en/latest/][SaltStack]]
+做自动化运维的文章http:////runforever.github.io/blog/2014-06-21-salt使用笔记.html, 这次
 换用[[http:////docs.ansible.com][Ansible]] ，顺便比较一下两种工具。
 
 ** 选用Ansible的原因
