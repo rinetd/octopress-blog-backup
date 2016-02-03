@@ -16,7 +16,11 @@ layout: default
     {% endif %}
     <a href="/blog/archives">Blog Archives</a>
     {% if paginator.previous_page %}
+    {% if paginator.previous_page == 1 %}
+    <a class="next" href="/">Newer &rarr;</a>
+    {% else %}
     <a class="next" href="{{paginator.previous_page}}">Newer &rarr;</a>
+    {% endif %}
     {% endif %}
   </div>
 </div>
