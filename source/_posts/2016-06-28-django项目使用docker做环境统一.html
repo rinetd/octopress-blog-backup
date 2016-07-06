@@ -1,0 +1,237 @@
+---
+title: "Django项目如何使用Docker搭建环境"
+date: 2016-06-28
+layout: post
+categories: [Docker, Django]
+published: true
+comments: true
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Django项目如何使用Docker搭建环境</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">背景</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+公司的项目前后端是分离的，前端使用React作为技术栈，后端使用Django做完web开发框架，<br  />
+前端的同学调试代码的时候需要启动后端的项目，后端的项目往往需要一堆环境依赖，例如数据库，<br  />
+Redis缓存，Python的库，每次搭建环境更新环境对于前端的同学来说都是一场噩梦，比如安装数据库，<br  />
+编译Python的库等等都会遇到很多问题，为了提高效率，更好的统一开发环境，所以使用了Docker来做<br  />
+这件事。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">达到的效果</h3>
+<div class="outline-text-3" id="text-1-2">
+
+<div class="figure">
+<p><img src="http://i1.piimg.com/567571/b91020a400c2106d.png" alt="b91020a400c2106d.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">流程</h3>
+<div class="outline-text-3" id="text-1-3">
+<ol class="org-ol">
+<li>安装Docker环境
+</li>
+<li>编写开发环境需要的Dockerfile
+</li>
+<li>编写docker-compose.yml定义好启动环境需要的依赖
+</li>
+<li>启动环境
+</li>
+<li>搭建私有的Docker Registry
+</li>
+<li>将自定义的docker image push到私有的registry
+</li>
+<li>常用操作
+</li>
+</ol>
+</div>
+
+<div id="outline-container-sec-1-3-1" class="outline-4">
+<h4 id="sec-1-3-1">安装Docker环境</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<p>
+这个不多说，大家参照官网安装就行
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-2" class="outline-4">
+<h4 id="sec-1-3-2">自定义开发环境所需要的Dockerfile</h4>
+<div class="outline-text-4" id="text-1-3-2">
+<div class="org-src-container">
+
+<pre class="src src-bash"># 使用国内的源加快速度
+FROM daocloud.io/library/python:2.7.11
+ENV PYTHONUNBUFFERED 1
+RUN sed -i 's/http:\/\/httpredir\.debian\.org\/debian\//http:\/\/mirrors\.163\.com\/debian\//g' /etc/apt/sources.list
+RUN apt-get update &amp;&amp; apt-get install -y gcc g++ python-software-properties libpq-dev git libmysqlclient-dev build-essential
+RUN mkdir /code
+WORKDIR /code
+ADD . /code/
+# 使用豆瓣源加快速度
+RUN pip install -r requirements/dev.txt -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-3" class="outline-4">
+<h4 id="sec-1-3-3">编写docker-compose.yml</h4>
+<div class="outline-text-4" id="text-1-3-3">
+<div class="org-src-container">
+
+<pre class="src src-bash"># mysql
+# username admin password root
+mysql:
+  image: daocloud.io/library/mysql:5.5.44
+  environment:
+    - MYSQL_ROOT_PASSWORD=root
+    - MYSQL_DATABASE=owl
+    - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+  volumes:
+    - ./conf:/etc/mysql/conf.d
+
+# redis
+# password root
+redis:
+  image: redis:latest
+  command: redis-server --requirepass root
+
+# mongo
+mongo:
+  image: daocloud.io/library/mongo:3.2.7
+
+# web
+web:
+  image: burnish/owl:latest
+  command: python manage.py runserver 0.0.0.0:8888
+  volumes:
+    - .:/code
+  ports:
+    - "8888:8888"
+  environment:
+    - PYTHONPATH=/code
+  links:
+    - mysql:mysql
+    - redis:redis
+    - mongo:mongo
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-4" class="outline-4">
+<h4 id="sec-1-3-4">启动环境</h4>
+<div class="outline-text-4" id="text-1-3-4">
+<div class="org-src-container">
+
+<pre class="src src-bash">docker-compose up
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-5" class="outline-4">
+<h4 id="sec-1-3-5">搭建私有的Docker Registry</h4>
+<div class="outline-text-4" id="text-1-3-5">
+<p>
+这个过程内容较长，不在这篇文章描述，后续会专门写一篇关于如何搭建环境的教程,
+搭建好的私有docker registry域名是burnsh
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-6" class="outline-4">
+<h4 id="sec-1-3-6">将build完成的docker image push到私有registry</h4>
+<div class="outline-text-4" id="text-1-3-6">
+<div class="org-src-container">
+
+<pre class="src src-bash"># 登陆
+docker login burnish
+
+# 打tag
+docker tag image burnish/owl:latest
+
+# push
+docker push burnish/owl:latest
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-7" class="outline-4">
+<h4 id="sec-1-3-7">常用操作和场景</h4>
+<div class="outline-text-4" id="text-1-3-7">
+</div><ul class="org-ul"><li>1. 初始化项目和app<br  /><div class="outline-text-5" id="text-1-3-7-1">
+<div class="org-src-container">
+
+<pre class="src src-bash"># 进入docker
+docker-compose web run --rm /bin/bash
+django-admin.py startapp app_xxx
+
+# 命令解释
+</pre>
+</div>
+</div>
+</li>
+
+<li>2. 数据库生成migration和migrate<br  /><div class="outline-text-5" id="text-1-3-7-2">
+<div class="org-src-container">
+
+<pre class="src src-bash">docker-compose web run --rm python manage.py makemigrations
+docker-compose web run --rm python manage.py migrate
+
+# 命令解释
+</pre>
+</div>
+</div>
+</li>
+
+<li>3. 安装新的python 包<br  /><div class="outline-text-5" id="text-1-3-7-3">
+<p>
+安装
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">docker-compose web run pip install xxxx
+docker commit container_id -a "runforever" -c "add new xxxx python lib" burnish/owl:latest
+docker push burnish/owl:latest
+</pre>
+</div>
+
+<p>
+更新
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">docker pull burnish/owl:latest
+docker-compose up
+</pre>
+</div>
+</div>
+</li>
+
+<li>4. pdb调试<br  /><div class="outline-text-5" id="text-1-3-7-4">
+<div class="org-src-container">
+
+<pre class="src src-bash">docker-compose run --service-ports --rm web
+</pre>
+</div>
+
+<p>
+<!-- more -->
+</p>
+</div>
+</li></ul>
+</div>
+</div>
+</div>
