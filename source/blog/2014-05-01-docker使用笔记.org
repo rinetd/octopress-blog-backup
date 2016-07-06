@@ -35,13 +35,7 @@ docker的英文本意是码头工人，也就是搬运工，这种搬运工搬�
 #+END_VERSE
 
 ** Mac上使用Docker
-方案有两种：
-+ 使用Virtualbox + Boot2docker + 加宿主机器上（也就是Mac上）安装Docker。
-+ 使用Virtualbox + Vagrant + CoreOS, 然后在CoreOS上使用Docker。
-
-个人倾向使用后者，因为CoreOS上有许多Docker的工具，而且该系统本身就是为了部署\\
-虚拟服务而使用的，而且不需要在Mac上安装Docker。\\
-CoreOS介绍请查看: https:////coreos.com/
+直接根据官网教程安装即可，https:////docs.docker.com/docker-for-mac/
 
 *** 安装
 1. 安装VirturalBox，下载地址https:////www.virtualbox.org/wiki/Downloads

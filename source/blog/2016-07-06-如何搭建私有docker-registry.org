@@ -1,0 +1,219 @@
+#+TITLE: 如何搭建私有Docker Registry
+#+DATE: 2016-07-06
+#+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
+#+JEKYLL_LAYOUT: post
+#+JEKYLL_CATEGORIES: Docker
+#+JEKYLL_PUBLISHED: true
+#+JEKYLL_COMMENTS: true
+
+* 如何搭建私有Docker Registry
+
+** 为什么要搭建私有的Docker Registry
+我们需要一个远端，随时同步最新的Docker开发环境image上去，团队的其他同学可以随时更新最新
+的开发环境到本地，公共的Docker Hub在国外，同步超级慢，国内DaoCloud的私有image需要收费，
+这一点对于我们小团队来说不太友好，所以就只能自己搭建私有的Docker Registry
+
+** 搭建步骤
+1. 环境准备
+2. 配置LetsEncrypt证书
+3. 安装Docker Registry
+4. 配置Nginx
+5. 后续工作
+
+*** 环境准备
+1. Linux服务器一台
+2. 域名
+3. 已经安装上Docker和Nginx
+
+注意：开发环境和服务器的Docker都必须升级到最新的版本 \\
+
+目录结构 \\
+http:////i4.piimg.com/567571/dfa3f652e14eda27.png
+
+*** 配置LetsEncrypt证书
+由于私有Docker Registry的安全机制，具体原因大家可以自己去看看https:////docs.docker.com/registry/deploying/#/running-a-domain-registry
+
+配置LetsEncrypt证书
+#+BEGIN_SRC bash
+git clone https://github.com/letsencrypt/letsencrypt
+cd letsencrypt
+./letsencrypt-auto certonly -d registry.yourdomain.xxx
+#+END_SRC
+http:////i2.piimg.com/567571/faa7276f29202027.png
+
+注意：安装的时候必须先关闭Nginx服务否则无法生成证书
+
+*** 安装Docker Registry
+pull Daocloud的docker registry公共镜像
+#+BEGIN_SRC bash
+docker pull daocloud.io/library/registry:2
+#+END_SRC
+
+将LetsEncrypt证书复制到/certs
+#+BEGIN_SRC bash
+cp /etc/letsencrypt/live/yourdomain/fullchain.pem certs/
+cp /etc/letsencrypt/live/youdomain/privkey.pem certs/
+#+END_SRC
+
+生成认证文件
+#+BEGIN_SRC bash
+docker run --entrypoint htpasswd daocloud.io/library/registry:2.4.1 -Bbn username password > auth/htpasswd
+#+END_SRC
+
+配置docker-compose.yml
+#+BEGIN_SRC bash
+# docker-compose.yml
+registry:
+  restart: always
+  image: daocloud.io/library/registry:2
+  ports:
+    - 5000:5000
+  environment:
+    # Example use Lensencrypt cert
+    REGISTRY_HTTP_TLS_CERTIFICATE: /certs/fullchain.pem
+    REGISTRY_HTTP_TLS_KEY: /certs/privkey.pem
+    REGISTRY_AUTH: htpasswd
+    REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+    REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+  volumes:
+    # Replace those three path
+    - /path/registry:/var/lib/registry
+    - /path/certs:/certs
+    - /path/auth:/auth
+#+END_SRC
+
+运行
+#+BEGIN_SRC bash
+docker-compose up
+#+END_SRC
+
+测试浏览器访问
+#+BEGIN_SRC bash
+https://yourdomain.xxx:5000/v2
+#+END_SRC
+
+测试push
+#+BEGIN_SRC bash
+docker login yourdomain.xxx:5000
+# 输入之前配置好的用户名密码
+
+docker pull redis
+docker tag redis yourdomain.xxx:5000/redis
+docker push yourdomain.xxx:5000/redis
+#+END_SRC
+
+成功的效果 \\
+http:////i1.piimg.com/567571/5860b16d5aa8d17a.jpg
+
+*** 配置Nginx做反向代理
+配置文件 docker_nginx.conf
+#+BEGIN_SRC bash
+# this is necessary for us to be able to disable request buffering in all cases
+proxy_http_version 1.1;
+
+server {
+    listen 443 ssl;
+    server_name docker.burnish.cn;
+
+# SSL
+    # Replace with your cert
+    ssl_certificate /path/certs/fullchain.pem;
+    ssl_certificate_key /path/certs/privkey.pem;
+
+# disable any limits to avoid HTTP 413 for large image uploads
+    client_max_body_size 0;
+
+# required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)
+    chunked_transfer_encoding on;
+
+    location /v1/ {
+      return 404;
+    }
+
+    location /v2/ {
+      proxy_pass https://127.0.0.1:5000;
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+      # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_buffering off;
+
+    }
+}
+
+server {
+    listen 80;
+    # Replace with your domain
+    server_name yourdomain;
+    rewrite ^/(.*) https://$server_name/$1 permanent;
+}
+#+END_SRC
+
+重新加载Nginx配置
+#+BEGIN_SRC bash
+# 软链接
+ln -s /path/docker_nginx.conf /etc/nginx/site-enabled
+
+# 测试
+nginx -t
+
+# 重新加载
+nginx -s reload
+#+END_SRC
+
+浏览器测试
+#+BEGIN_SRC bash
+https://yourdomain.xxx/v2
+
+# 需要输入之前配置好的用户名和密码
+#+END_SRC
+
+push测试
+#+BEGIN_SRC bash
+docker login yourdomain.xxx
+# 输入之前配置好的用户名密码
+docker pull redis
+docker tag redis yourdomain.xxx/redis
+docker push yourdomain.xxx/redis
+#+END_SRC
+
+*** 后续工作
+由于LetsEncrypt证书3个月会自动过期，需要使用脚本做自动更新，配合crontab两个月更新一次
+
+renew_cert.sh
+#+BEGIN_SRC bash
+#!/bin/bash
+
+# renew cert
+/letsencrypt/certbot-auto renew --pre-hook "service nginx stop" --post-hook "service nginx start"
+
+# backup cert
+cp /yourpath/docker-registry/certs/fullchain.pem /yourpath/docker-registry/certs/fullchain.pem.bak
+cp /yourpath/docker-registry/certs/privkey.pem /yourpath/docker-registry/certs/privkey.pem.bak
+
+# change cert
+cp /etc/letsencrypt/live/yourdomain/fullchain.pem /yourpath/docker-registry/certs/fullchain.pem
+cp /etc/letsencrypt/live/yourdomain/privkey.pem /yourpath/docker-registry/certs/privkey.pem
+#+END_SRC
+
+运行
+#+BEGIN_SRC bash
+sh renew_cert.sh
+#+END_SRC
+
+** 参考
+http:////www.jianshu.com/p/141855241f2d
+
+** 感谢
+https:////www.daocloud.io 提供公共镜像
+
+** 参考
+http:////www.jianshu.com/p/141855241f2d
+
+** 感谢
+https:////www.daocloud.io 提供国内的公共镜像服务
+
+
+{{{more}}}

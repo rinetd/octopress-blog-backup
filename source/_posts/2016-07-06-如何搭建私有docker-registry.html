@@ -1,0 +1,339 @@
+---
+title: "如何搭建私有Docker Registry"
+date: 2016-07-06
+layout: post
+categories: Docker
+published: true
+comments: true
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">如何搭建私有Docker Registry</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">为什么要搭建私有的Docker Registry</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+我们需要一个远端，随时同步最新的Docker开发环境image上去，团队的其他同学可以随时更新最新
+的开发环境到本地，公共的Docker Hub在国外，同步超级慢，国内DaoCloud的私有image需要收费，
+这一点对于我们小团队来说不太友好，所以就只能自己搭建私有的Docker Registry
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">搭建步骤</h3>
+<div class="outline-text-3" id="text-1-2">
+<ol class="org-ol">
+<li>环境准备
+</li>
+<li>配置LetsEncrypt证书
+</li>
+<li>安装Docker Registry
+</li>
+<li>配置Nginx
+</li>
+<li>后续工作
+</li>
+</ol>
+</div>
+
+<div id="outline-container-sec-1-2-1" class="outline-4">
+<h4 id="sec-1-2-1">环境准备</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<ol class="org-ol">
+<li>Linux服务器一台
+</li>
+<li>域名
+</li>
+<li>已经安装上Docker和Nginx
+</li>
+</ol>
+
+<p>
+注意：开发环境和服务器的Docker都必须升级到最新的版本 <br  />
+</p>
+
+<p>
+目录结构 <br  />
+<img src="http://i4.piimg.com/567571/dfa3f652e14eda27.png" alt="dfa3f652e14eda27.png" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2-2" class="outline-4">
+<h4 id="sec-1-2-2">配置LetsEncrypt证书</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<p>
+由于私有Docker Registry的安全机制，具体原因大家可以自己去看看<a href="https://docs.docker.com/registry/deploying/#/running-a-domain-registry">https://docs.docker.com/registry/deploying/#/running-a-domain-registry</a>
+</p>
+
+<p>
+配置LetsEncrypt证书
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">git clone https://github.com/letsencrypt/letsencrypt
+cd letsencrypt
+./letsencrypt-auto certonly -d registry.yourdomain.xxx
+</pre>
+</div>
+
+<div class="figure">
+<p><img src="http://i2.piimg.com/567571/faa7276f29202027.png" alt="faa7276f29202027.png" />
+</p>
+</div>
+
+<p>
+注意：安装的时候必须先关闭Nginx服务否则无法生成证书
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2-3" class="outline-4">
+<h4 id="sec-1-2-3">安装Docker Registry</h4>
+<div class="outline-text-4" id="text-1-2-3">
+<p>
+pull Daocloud的docker registry公共镜像
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">docker pull daocloud.io/library/registry:2
+</pre>
+</div>
+
+<p>
+将LetsEncrypt证书复制到/certs
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">cp /etc/letsencrypt/live/yourdomain/fullchain.pem certs/
+cp /etc/letsencrypt/live/youdomain/privkey.pem certs/
+</pre>
+</div>
+
+<p>
+生成认证文件
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">docker run --entrypoint htpasswd daocloud.io/library/registry:2.4.1 -Bbn username password &gt; auth/htpasswd
+</pre>
+</div>
+
+<p>
+配置docker-compose.yml
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash"># docker-compose.yml
+registry:
+  restart: always
+  image: daocloud.io/library/registry:2
+  ports:
+    - 5000:5000
+  environment:
+    # Example use Lensencrypt cert
+    REGISTRY_HTTP_TLS_CERTIFICATE: /certs/fullchain.pem
+    REGISTRY_HTTP_TLS_KEY: /certs/privkey.pem
+    REGISTRY_AUTH: htpasswd
+    REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+    REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+  volumes:
+    # Replace those three path
+    - /path/registry:/var/lib/registry
+    - /path/certs:/certs
+    - /path/auth:/auth
+</pre>
+</div>
+
+<p>
+运行
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">docker-compose up
+</pre>
+</div>
+
+<p>
+测试浏览器访问
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">https://yourdomain.xxx:5000/v2
+</pre>
+</div>
+
+<p>
+测试push
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">docker login yourdomain.xxx:5000
+# 输入之前配置好的用户名密码
+
+docker pull redis
+docker tag redis yourdomain.xxx:5000/redis
+docker push yourdomain.xxx:5000/redis
+</pre>
+</div>
+
+<p>
+成功的效果 <br  />
+<img src="http://i1.piimg.com/567571/5860b16d5aa8d17a.jpg" alt="5860b16d5aa8d17a.jpg" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2-4" class="outline-4">
+<h4 id="sec-1-2-4">配置Nginx做反向代理</h4>
+<div class="outline-text-4" id="text-1-2-4">
+<p>
+配置文件 docker_nginx.conf
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash"># this is necessary for us to be able to disable request buffering in all cases
+proxy_http_version 1.1;
+
+server {
+    listen 443 ssl;
+    server_name docker.burnish.cn;
+
+# SSL
+    # Replace with your cert
+    ssl_certificate /path/certs/fullchain.pem;
+    ssl_certificate_key /path/certs/privkey.pem;
+
+# disable any limits to avoid HTTP 413 for large image uploads
+    client_max_body_size 0;
+
+# required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)
+    chunked_transfer_encoding on;
+
+    location /v1/ {
+      return 404;
+    }
+
+    location /v2/ {
+      proxy_pass https://127.0.0.1:5000;
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+      # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_buffering off;
+
+    }
+}
+
+server {
+    listen 80;
+    # Replace with your domain
+    server_name yourdomain;
+    rewrite ^/(.*) https://$server_name/$1 permanent;
+}
+</pre>
+</div>
+
+<p>
+重新加载Nginx配置
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash"># 软链接
+ln -s /path/docker_nginx.conf /etc/nginx/site-enabled
+
+# 测试
+nginx -t
+
+# 重新加载
+nginx -s reload
+</pre>
+</div>
+
+<p>
+浏览器测试
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">https://yourdomain.xxx/v2
+
+# 需要输入之前配置好的用户名和密码
+</pre>
+</div>
+
+<p>
+push测试
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">docker login yourdomain.xxx
+# 输入之前配置好的用户名密码
+docker pull redis
+docker tag redis yourdomain.xxx/redis
+docker push yourdomain.xxx/redis
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2-5" class="outline-4">
+<h4 id="sec-1-2-5">后续工作</h4>
+<div class="outline-text-4" id="text-1-2-5">
+<p>
+由于LetsEncrypt证书3个月会自动过期，需要使用脚本做自动更新，配合crontab两个月更新一次
+</p>
+
+<p>
+renew_cert.sh
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">#!/bin/bash
+
+# renew cert
+/letsencrypt/certbot-auto renew --pre-hook "service nginx stop" --post-hook "service nginx start"
+
+# backup cert
+cp /yourpath/docker-registry/certs/fullchain.pem /yourpath/docker-registry/certs/fullchain.pem.bak
+cp /yourpath/docker-registry/certs/privkey.pem /yourpath/docker-registry/certs/privkey.pem.bak
+
+# change cert
+cp /etc/letsencrypt/live/yourdomain/fullchain.pem /yourpath/docker-registry/certs/fullchain.pem
+cp /etc/letsencrypt/live/yourdomain/privkey.pem /yourpath/docker-registry/certs/privkey.pem
+</pre>
+</div>
+
+<p>
+运行
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">sh renew_cert.sh
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3">参考</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+<a href="http://www.jianshu.com/p/141855241f2d">http://www.jianshu.com/p/141855241f2d</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4">感谢</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+<a href="https://www.daocloud.io">https://www.daocloud.io</a> 提供公共镜像
+</p>
+</div>
+</div>
+</div>
