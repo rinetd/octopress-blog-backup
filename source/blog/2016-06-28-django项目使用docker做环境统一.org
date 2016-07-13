@@ -112,14 +112,13 @@ docker-compose web run --rm /bin/bash
 django-admin.py startapp app_xxx
 
 # 命令解释
+# 进入contanier中，新建app
 #+END_SRC
 
 **** 2. 数据库生成migration和migrate
 #+BEGIN_SRC bash
 docker-compose web run --rm python manage.py makemigrations
 docker-compose web run --rm python manage.py migrate
-
-# 命令解释
 #+END_SRC
 
 **** 3. 安装新的python 包
