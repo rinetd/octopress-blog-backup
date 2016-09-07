@@ -10,7 +10,7 @@
 
 ** 设计思想
 一图胜千言：\\
-[[./images/GoHttpServerDesign.png]]
+[[http:////i1.piimg.com/567571/1bcc6ee379374835.png]]
 并发模型是，只要有client来访问就开一个goroutine去处理，goroutine之间\\
 不需要通信。\\
 
