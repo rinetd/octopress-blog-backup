@@ -37,34 +37,6 @@ docker的英文本意是码头工人，也就是搬运工，这种搬运工搬�
 ** Mac上使用Docker
 直接根据官网教程安装即可，https:////docs.docker.com/docker-for-mac/
 
-*** 安装
-1. 安装VirturalBox，下载地址https:////www.virtualbox.org/wiki/Downloads
-2. 安装Vagrant，下载地址http:////www.vagrantup.com/downloads.html
-3. 安装CoreOS
-#+BEGIN_SRC sh
-git clone https://github.com/coreos/coreos-vagrant.git
-cd coreos-vagrant
-
-# 启动CoreOS
-vagrant up
-
-# SSH 进入vagrant
-vagrant ssh
-
-# 查看docker version
-docker version
-
-Client version: 0.11.1
-Client API version: 1.11
-Go version (client): go1.2
-Git commit (client): fb99f99
-Server version: 0.11.1
-Server API version: 1.11
-Git commit (server): fb99f99
-Go version (server): go1.2
-#+END_SRC
-至此Docker环境已经搞定。
-
 ** 使用Docker
 首先请查看官方的基础教程，移步https:////www.docker.io/gettingstarted/  \\
 
@@ -109,12 +81,8 @@ docker commit container_id image_name
 docker kill $(docker ps -q) ; docker rm $(docker ps -a -q) ; docker rmi $(docker images -q -a)
 
 # 删除所有的Container
-sudo docker rm `sudo docker ps -a -q`
+docker rm `docker ps -a -q`
 #+END_SRC
-
-** 进阶用法（后续补充）
-1. 定制Docker image， 使用Dockerfile
-2. 使用fleet 管理Docker service
 
 ** 参考
 #+BEGIN_QUOTE
