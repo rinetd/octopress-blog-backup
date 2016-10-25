@@ -1,55 +1,58 @@
-#+TITLE: 如何搭建私有Docker Registry
+#+TITLE: 搭建私有 Docker Registry
 #+DATE: 2016-07-06
+#+LINK: docker_registry
 #+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
 #+JEKYLL_LAYOUT: post
 #+JEKYLL_CATEGORIES: Docker
 #+JEKYLL_PUBLISHED: true
 #+JEKYLL_COMMENTS: true
 
-** 原因
-我们需要一个远端，随时同步最新的Docker开发环境image上去，团队的其他同学可以随时更新最新
-的开发环境到本地，公共的Docker Hub在国外，同步超级慢，国内DaoCloud的私有image需要收费，
-这一点对于我们小团队来说不太友好，所以就只能自己搭建私有的Docker Registry
+为了团队的其他同学可以方便的更新开发环境到本地，我们决定搭建私有的 Docker Registry。具体原因
+1. Docker Hub 在国外，同步超级慢。
+2. DaoCloud 的私有 image 需要收费，对于我们小团队来说不太友好。
+
+** 搭建步骤
+1. 环境准备。
+2. 配置 LetsEncrypt 证书。
+3. 安装 Docker Registry。
+4. 配置 Nginx。
+5. 后续工作。
 
 {{{more}}}
 
-** 搭建步骤
-1. 环境准备
-2. 配置LetsEncrypt证书
-3. 安装Docker Registry
-4. 配置Nginx
-5. 后续工作
-
 *** 环境准备
-1. Linux服务器一台
-2. 域名
-3. 已经安装上Docker和Nginx
+1. Linux 服务器一台。
+2. 域名。
+3. 已经安装上 Docker 和 Nginx。
 
-注意：开发环境和服务器的Docker都必须升级到最新的版本 \\
+注意：开发环境和服务器的 Docker 都先升级到最新的版本，否则有可能出现未知的失败。 \\
 
 目录结构 \\
 http:////i4.piimg.com/567571/dfa3f652e14eda27.png
 
-*** 配置LetsEncrypt证书
-由于私有Docker Registry的安全机制，具体原因大家可以自己去看看https:////docs.docker.com/registry/deploying/#/running-a-domain-registry
+*** 配置 LetsEncrypt 证书
+由于私有 Docker Registry 的安全机制，需要使用 Https，[[https:////docs.docker.com/registry/deploying/#/running-a-domain-registry][原因]]
 
-配置LetsEncrypt证书
+配置 LetsEncrypt 证书
+使用 [[https:////certbot.eff.org/#ubuntutrusty-nginx][certbot]]
 #+BEGIN_SRC bash
-git clone https://github.com/letsencrypt/letsencrypt
-cd letsencrypt
-./letsencrypt-auto certonly -d registry.yourdomain.xxx
+wget https://dl.eff.org/certbot-auto
+chmod a+x certbot-auto
+$ ./certbot-auto
+
+./path/to/certbot-auto certonly --standalone -d registry.yourdomain.com
 #+END_SRC
-http:////i2.piimg.com/567571/faa7276f29202027.png
 
-注意：安装的时候必须先关闭Nginx服务否则无法生成证书
+*安装的时候必须先关闭 Nginx 服务否则无法生成证书* \\
+*LetsEncrypt 只支持二级域名，而且有域名个数限制，提前想好私有 Docker Registry 的二级域名*
 
-*** 安装Docker Registry
-pull Daocloud的docker registry公共镜像
+*** 安装 Docker Registry
+使用 daocloud 上的 docker registry 公共镜像
 #+BEGIN_SRC bash
 docker pull daocloud.io/library/registry:2
 #+END_SRC
 
-将LetsEncrypt证书复制到/certs
+将 LetsEncrypt 证书复制到 /certs
 #+BEGIN_SRC bash
 cp /etc/letsencrypt/live/yourdomain/fullchain.pem certs/
 cp /etc/letsencrypt/live/youdomain/privkey.pem certs/
@@ -60,7 +63,7 @@ cp /etc/letsencrypt/live/youdomain/privkey.pem certs/
 docker run --entrypoint htpasswd daocloud.io/library/registry:2.4.1 -Bbn username password > auth/htpasswd
 #+END_SRC
 
-配置docker-compose.yml
+配置 docker-compose.yml
 #+BEGIN_SRC bash
 # docker-compose.yml
 registry:
@@ -105,7 +108,7 @@ docker push yourdomain.xxx:5000/redis
 成功的效果 \\
 http:////i1.piimg.com/567571/5860b16d5aa8d17a.jpg
 
-*** 配置Nginx做反向代理
+*** 配置 Nginx 做反向代理
 配置文件 docker_nginx.conf
 #+BEGIN_SRC bash
 # this is necessary for us to be able to disable request buffering in all cases
@@ -113,17 +116,17 @@ proxy_http_version 1.1;
 
 server {
     listen 443 ssl;
-    server_name docker.burnish.cn;
+    server_name registry.youdomain.com;
 
-# SSL
+    # SSL
     # Replace with your cert
     ssl_certificate /path/certs/fullchain.pem;
     ssl_certificate_key /path/certs/privkey.pem;
 
-# disable any limits to avoid HTTP 413 for large image uploads
+    # disable any limits to avoid HTTP 413 for large image uploads
     client_max_body_size 0;
 
-# required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)
+    # required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)
     chunked_transfer_encoding on;
 
     location /v1/ {
@@ -151,7 +154,7 @@ server {
 }
 #+END_SRC
 
-重新加载Nginx配置
+重新加载 Nginx 配置
 #+BEGIN_SRC bash
 # 软链接
 ln -s /path/docker_nginx.conf /etc/nginx/site-enabled
@@ -170,7 +173,7 @@ https://yourdomain.xxx/v2
 # 需要输入之前配置好的用户名和密码
 #+END_SRC
 
-push测试
+push 测试
 #+BEGIN_SRC bash
 docker login yourdomain.xxx
 # 输入之前配置好的用户名密码
@@ -180,7 +183,7 @@ docker push yourdomain.xxx/redis
 #+END_SRC
 
 *** 后续工作
-由于LetsEncrypt证书3个月会自动过期，需要使用脚本做自动更新，配合crontab两个月更新一次
+由于 LetsEncrypt 证书 3 个月会自动过期，需要使用脚本做自动更新，配合 crontab 两个月更新一次
 
 renew_cert.sh
 #+BEGIN_SRC bash
