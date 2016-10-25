@@ -3,8 +3,9 @@
 # ----------------------- #
 
 url: http://runforever.github.io
-title: runforever
-subtitle: 理论不懂实践，实践不懂看理论
+title: Runforever's Blog
+logo: http://cdn.defcoding.com/0227c20b4bab4ef28f08f9ae3c6aa875.jpg
+subtitle: K.I.S.S
 author: runforever
 simple_search: http://google.com/search
 
@@ -51,7 +52,8 @@ titlecase: true       # Converts page and post titles to titlecase
 
 # list each of the sidebar modules you want to include, in the order you want them to appear.
 # To add custom asides, create files in /source/_includes/custom/asides/ and add them to the list like 'custom/asides/custom_aside_name.html'
-default_asides: [asides/about.html, asides/category_list.html, asides/recent_posts.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]
+
+default_asides: [asides/sitebar.html, asides/about.html, asides/category_list.html, asides/recent_posts.html]
 
 # Each layout uses the default asides, but they can have their own asides instead. Simply uncomment the lines below
 # and add an array with the asides you want to use.
@@ -91,8 +93,8 @@ delicious_user:
 delicious_count: 3
 
 # Disqus Comments
-disqus_short_name: runforever23
-disqus_show_comment_count: true
+disqus_short_name:
+disqus_show_comment_count: false
 
 # Google Analytics
 google_analytics_tracking_id:

@@ -6,8 +6,6 @@
 #+JEKYLL_PUBLISHED: true
 #+JEKYLL_COMMENTS: true
 
-* Django项目如何使用Docker搭建环境
-
 ** 背景
 公司的项目前后端是分离的，前端使用React作为技术栈，后端使用Django做完web开发框架，
 前端的同学调试代码的时候需要启动后端的项目，后端的项目往往需要一堆环境依赖，例如数据库，
@@ -17,6 +15,8 @@ Redis缓存，Python的库，每次搭建环境更新环境对于前端的同学
 
 ** 达到的效果
 [[http:////i1.piimg.com/567571/b91020a400c2106d.png]]
+
+{{{more}}}
 
 ** 流程
 1. 安装Docker环境
@@ -139,5 +139,3 @@ docker-compose up
 #+BEGIN_SRC bash
 docker-compose run --service-ports --rm web
 #+END_SRC
-
-{{{more}}}

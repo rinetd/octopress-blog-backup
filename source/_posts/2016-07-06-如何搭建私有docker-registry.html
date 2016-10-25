@@ -8,22 +8,23 @@ comments: true
 ---
 
 <div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1">如何搭建私有Docker Registry</h2>
+<h2 id="sec-1">原因</h2>
 <div class="outline-text-2" id="text-1">
-</div><div id="outline-container-sec-1-1" class="outline-3">
-<h3 id="sec-1-1">为什么要搭建私有的Docker Registry</h3>
-<div class="outline-text-3" id="text-1-1">
 <p>
 我们需要一个远端，随时同步最新的Docker开发环境image上去，团队的其他同学可以随时更新最新
 的开发环境到本地，公共的Docker Hub在国外，同步超级慢，国内DaoCloud的私有image需要收费，
 这一点对于我们小团队来说不太友好，所以就只能自己搭建私有的Docker Registry
 </p>
+
+<p>
+<!-- more -->
+</p>
 </div>
 </div>
 
-<div id="outline-container-sec-1-2" class="outline-3">
-<h3 id="sec-1-2">搭建步骤</h3>
-<div class="outline-text-3" id="text-1-2">
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">搭建步骤</h2>
+<div class="outline-text-2" id="text-2">
 <ol class="org-ol">
 <li>环境准备
 </li>
@@ -38,9 +39,9 @@ comments: true
 </ol>
 </div>
 
-<div id="outline-container-sec-1-2-1" class="outline-4">
-<h4 id="sec-1-2-1">环境准备</h4>
-<div class="outline-text-4" id="text-1-2-1">
+<div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1">环境准备</h3>
+<div class="outline-text-3" id="text-2-1">
 <ol class="org-ol">
 <li>Linux服务器一台
 </li>
@@ -61,9 +62,9 @@ comments: true
 </div>
 </div>
 
-<div id="outline-container-sec-1-2-2" class="outline-4">
-<h4 id="sec-1-2-2">配置LetsEncrypt证书</h4>
-<div class="outline-text-4" id="text-1-2-2">
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2">配置LetsEncrypt证书</h3>
+<div class="outline-text-3" id="text-2-2">
 <p>
 由于私有Docker Registry的安全机制，具体原因大家可以自己去看看<a href="https://docs.docker.com/registry/deploying/#/running-a-domain-registry">https://docs.docker.com/registry/deploying/#/running-a-domain-registry</a>
 </p>
@@ -90,9 +91,9 @@ cd letsencrypt
 </div>
 </div>
 
-<div id="outline-container-sec-1-2-3" class="outline-4">
-<h4 id="sec-1-2-3">安装Docker Registry</h4>
-<div class="outline-text-4" id="text-1-2-3">
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3">安装Docker Registry</h3>
+<div class="outline-text-3" id="text-2-3">
 <p>
 pull Daocloud的docker registry公共镜像
 </p>
@@ -186,9 +187,9 @@ docker push yourdomain.xxx:5000/redis
 </div>
 </div>
 
-<div id="outline-container-sec-1-2-4" class="outline-4">
-<h4 id="sec-1-2-4">配置Nginx做反向代理</h4>
-<div class="outline-text-4" id="text-1-2-4">
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4">配置Nginx做反向代理</h3>
+<div class="outline-text-3" id="text-2-4">
 <p>
 配置文件 docker_nginx.conf
 </p>
@@ -280,9 +281,9 @@ docker push yourdomain.xxx/redis
 </div>
 </div>
 
-<div id="outline-container-sec-1-2-5" class="outline-4">
-<h4 id="sec-1-2-5">后续工作</h4>
-<div class="outline-text-4" id="text-1-2-5">
+<div id="outline-container-sec-2-5" class="outline-3">
+<h3 id="sec-2-5">后续工作</h3>
+<div class="outline-text-3" id="text-2-5">
 <p>
 由于LetsEncrypt证书3个月会自动过期，需要使用脚本做自动更新，配合crontab两个月更新一次
 </p>
@@ -319,21 +320,20 @@ cp /etc/letsencrypt/live/yourdomain/privkey.pem /yourpath/docker-registry/certs/
 </div>
 </div>
 
-<div id="outline-container-sec-1-3" class="outline-3">
-<h3 id="sec-1-3">参考</h3>
-<div class="outline-text-3" id="text-1-3">
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">参考</h2>
+<div class="outline-text-2" id="text-3">
 <p>
 <a href="http://www.jianshu.com/p/141855241f2d">http://www.jianshu.com/p/141855241f2d</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-1-4" class="outline-3">
-<h3 id="sec-1-4">感谢</h3>
-<div class="outline-text-3" id="text-1-4">
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">感谢</h2>
+<div class="outline-text-2" id="text-4">
 <p>
-<a href="https://www.daocloud.io">https://www.daocloud.io</a> 提供公共镜像
+<a href="https://www.daocloud.io">https://www.daocloud.io</a> 提供国内的公共镜像服务
 </p>
-</div>
 </div>
 </div>

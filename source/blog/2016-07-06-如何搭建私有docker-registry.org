@@ -6,12 +6,12 @@
 #+JEKYLL_PUBLISHED: true
 #+JEKYLL_COMMENTS: true
 
-* 如何搭建私有Docker Registry
-
-** 为什么要搭建私有的Docker Registry
+** 原因
 我们需要一个远端，随时同步最新的Docker开发环境image上去，团队的其他同学可以随时更新最新
 的开发环境到本地，公共的Docker Hub在国外，同步超级慢，国内DaoCloud的私有image需要收费，
 这一点对于我们小团队来说不太友好，所以就只能自己搭建私有的Docker Registry
+
+{{{more}}}
 
 ** 搭建步骤
 1. 环境准备
@@ -207,13 +207,4 @@ sh renew_cert.sh
 http:////www.jianshu.com/p/141855241f2d
 
 ** 感谢
-https:////www.daocloud.io 提供公共镜像
-
-** 参考
-http:////www.jianshu.com/p/141855241f2d
-
-** 感谢
 https:////www.daocloud.io 提供国内的公共镜像服务
-
-
-{{{more}}}
