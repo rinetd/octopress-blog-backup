@@ -7,7 +7,8 @@
 #+JEKYLL_PUBLISHED: true
 #+JEKYLL_COMMENTS: true
 
-为了团队的其他同学可以方便的更新开发环境到本地，我们决定搭建私有的 Docker Registry。具体原因
+为了团队的其他同学可以方便的更新开发环境到本地，我们决定搭建私有的 Docker Registry。\\
+不使用公共服务的原因：
 1. Docker Hub 在国外，同步超级慢。
 2. DaoCloud 的私有 image 需要收费，对于我们小团队来说不太友好。
 
