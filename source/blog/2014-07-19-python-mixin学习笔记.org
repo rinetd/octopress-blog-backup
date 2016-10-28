@@ -1,4 +1,4 @@
-#+TITLE: Python Mixin学习笔记
+#+TITLE: Python Mixin 学习笔记
 #+DATE: 2014-07-19
 #+SETUPFILE: ~/CodeRepo/GitRepo/octopress/org-sty/setupfile.org
 #+JEKYLL_LAYOUT: post
@@ -6,40 +6,212 @@
 #+JEKYLL_PUBLISHED: true
 #+JEKYLL_COMMENTS: true
 
-* Python Mixin学习笔记
+** 2016-10-25 17:04 的邮件
+正思考着如何给 [[https:////github.com/BurnishTechCN/djkit][djkit]]（Django starter）项目添加 admin 和 models 的支持，
+此时收到一封邮件，来自 [[https:////github.com/uhayate][uhayate]]，内容如下：
+
+http:////cdn.defcoding.com/5EB59FBA-21CC-4BAB-98CB-BCA70237C5DD.png
+
+看了他的 github 和博客，我确定我不认识这个同学，这下有意思了，我的博客居
+然被人搜索到而且还发现了一个错误，赶紧回了邮件然后审查文章压压惊，之后便有了
+这次更新，不得不说，两年前写的东西还是欠火候，至于评论功能，使用 [[https:////github.com/runforever/runforever.github.com/issues/new][Issue]]。
+
+*** 主要更新
+1. 新式类 MRO 的机制理解。
+2. 文章排版按照[[https:////github.com/sparanoid/chinese-copywriting-guidelines][ 中文文案排版指北]] 重排。
+3. Mixin 使用场景。
+
+*** 更新总结
+1. 多继承真的很复杂。
+2. 博客和代码一样，每当你过一段时间回头来看会问自己当时为什么要这样写，代码要经常重构，文章也需要经常更新，当别人看到你写的东西的时候就要拿出最好的给读者。
 
 ** 来由
-对python的面向对象编程研究的比较少，然而django是从1.3推荐使用class base view的，
-所以免不了会用到python的面向对象的特性，所以把研究的东西记录一下。
+对 Python 的面向对象编程研究的比较少，Django 是从 1.3 推荐使用 class base view，
+免不了会用到 Python 的面向对象的特性，所以把研究的东西记录一下。
 
 ** 知识点
-1. Python 面向对象的基本使用
-2. Python 中的静态方法、类方法、实例方法
-3. Python 中多继承的方法执行顺序MRO
-4. Mixin 和多继承有什么区别及应用场景
+1. Python 面向对象的基本使用和多继承 MRO（method resolution order）的机制。
+2. Mixin 和多继承有什么区别及应用场景。
+3. Python 中的静态方法、类方法、实例方法。
 
-** Python 面向对象的基本使用
-*** Python中有两种方法可以定义class分别是old school和new school
+{{{more}}}
+
+** 1. Python 面向对象的基本使用和 MRO
+*** 定义 class
+old school 旧式类
 #+BEGIN_SRC python
 class Foo:
-    '''old school不能使用super关键字'''
+    '''old school 不能使用 super 关键字'''
     def __init__(self):
         pass
-
-class Bar(object):
-    '''new school可以使用super关键字'''
-    def __init__(self):
-        pass
-
-# 区别在于是否继承object，old school和new school的方式
-# 会影响多继承方法的执行顺序，old school的查找顺序式深度优先
-# new school的查找顺序式广度优先
-# 想要使用super关键字的话就使用新式类，老式类会报错，
-# TypeError: must be type, not classobj
 #+END_SRC
 
-** Python 中的类方法，静态方法和实例方法
-[[http:////www.libaoyin.com/2013/08/06/pyhton-staticmethod-classmethod/][python静态方法和类方法]]
+new school 新式类
+#+BEGIN_SRC python
+class Bar(object):
+    '''new school 继承自 object 可以使用 super 关键字'''
+    def __init__(self):
+        pass
+
+#+END_SRC
+两者区别在于是否继承 object，old school 的查找顺序式深度优先，new school 的查找顺序是 C3 算法
+
+*** old school 类多继承的问题
+我查阅了很多文章，基本都用下面的例子说明存在的问题
+#+BEGIN_SRC python
+class A():
+    def foo1(self):
+        print "A"
+class B(A):
+    def foo2(self):
+        pass
+class C(A):
+    def foo1(self):
+        print "C"
+class D(B, C):
+    pass
+
+d = D()
+d.foo1() # 调用的是 A 的 foo1 方法
+# result: A
+#+END_SRC
+
+old school 的 MRO 过程\\
+
+http:////cdn.defcoding.com/img_0045.jpg
+
+由于基本不用多继承，竟然一开始没有理解到这样结果有什么问题，仔细一想，
+如果我写了这样的多继承代码，我应该是想使用父类 C 的 foo1() 方法，结果
+给了我 A 的 foo1() 方法，确实不符合预期，既然如此是不是换个顺序就解决
+问题了 class D(C, B)，可能解决了调用 foo1 的问题，然而顺序换了之后使
+用别的父类方法依然会出现类似 foo1 方法的问题，修复 bug 的同时引入了
+其他 bug，于是我很好奇的去看了 C3 算法是如何解决这个问题的。
+
+*** C3 算法
+在我查找 C3 算法资料的时候发现 Python 2.2 版本的 MRO 使用的是广度优先搜索，
+这个我就不多说了，现在没有人还会使用 Python 2.2 版本，2.3 以后的版本 MRO 都是使用的 C3。
+
+我们把上面多继承的例子改成 new school 方式，Python 提供了 =__mro__= 方法来看 MRO
+#+BEGIN_SRC python
+class A(object):
+    def foo1(self):
+        print "A"
+class B(A):
+    def foo2(self):
+        pass
+class C(A):
+    def foo1(self):
+        print "C"
+class D(B, C):
+    pass
+
+d = D()
+print D.__mro__
+d.foo1() # 符合预期的调用的是 C 的 foo1 方法
+# result: C
+#+END_SRC
+
+C3 算法比较有意思，用了函数式编程编程的思想。
+#+BEGIN_SRC python
+# L 是求 MRO 顺序的函数
+L(object) = object
+L(D(B, C)) = C + merge(L(B), L(C), BC)
+#+END_SRC
+
+merge 过程很难用文字解释清楚，我们通过过程来理解。
+#+BEGIN_SRC python
+O = object
+L(O) = O
+L(A(O)) = A + merge(L(O))
+        = AO
+
+L(B(A)) = B + merge(L(A))
+        = B + merge(A O)
+        = BAO
+
+L(C(A)) = CAO # 计算过程同上
+
+L(D(B, C)) = D + merge(L(B), L(C), BC)
+           = D + merge(BAO, CAO, BC)       # B 都是第一，B out
+           = D + B + merge(AO, CAO, C)     # A 和 O 都在 CAO 后，不能 out，C 在第一，C out
+           = D + B + C + merge(AO, AO)     # A 都是第一，A out
+           = D + B + C + A + merge(O, O)   # 同上，O out
+           = D + B + C + A + O
+#+END_SRC
+从上面的 MRO 顺序我们看到最终调用的 foo1 是 C 类的 foo1，这个问题解决，
+同时 MRO 也展现了多继承设计是很复杂的，为了解决这样的复杂性，出现了 Mixin。
+
+如果看不懂，直接使用 =__mro__= 方法来看继承顺序。
+
+都使用 new school 来定义类，不要 old school 和 new school 混用。
+
+** 2. 使用 Mixin
+*** 什么是Mixin
+继承，组合都是为了代码复用，Mixin 方式也是一种多继承，但他看起来像是用组合的方式来实现代码复用，
+可以把 Mixin 看成是一个个的插件，设计的类需要什么插件就继承相应的 Mixin。
+
+*** Mixin 设计代码的方式
+代码中的任何单元（package，module，class，function）都要遵循只做一件事，并且把这件事做好的原则，
+Mixin 也要保证一个 Mixin 只有一个功能，如果有多个功能，写成多个 Mixin。
+
+*** Mixin 的使用场景
+我们写 web view 的时候会有涉及到认证和权限，下面我们来看 Django 是怎样通过 Mixin 来解决这个问题的。
+#+BEGIN_SRC python
+# 登录认证 Mixin
+class LoginRequiredMixin(object):
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
+
+
+# 不校验 CSRF Mixin
+class CSRFExemptMixin(object):
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super(CSRFExemptMixin, self).dispatch(*args, **kwargs)
+
+
+# 管理员认证 Mixin
+class StaffRequiredMixin(object):
+
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    def dispatch(self, request, *args, **kwargs):
+        return super(StaffRequiredMixin, self).dispatch(request, *args, **kwargs)
+
+
+# 没有认证的 web view
+class ShowCodeView(View):
+
+    def get(self, request):
+       return HttpResponse('I am a web view')
+
+    def post(self, request):
+       return HttpResponse('post success')
+
+
+# 1. View 添加 Login 认证
+class ShowCodeView(LoginRequiredMixin, View):
+    '''do something'''
+
+
+# 2. View 不校验 CSRF 并且 Login 认证
+class ShowCodeView(CSRFExemptMixin, LoginRequiredMixin, View):
+    '''do something'''
+
+
+# 3. View 需要管理员认证
+class ShowCodeView(StaffRequiredMixin, View):
+    '''do something'''
+#+END_SRC
+看完上面的代码 Mixin 确实让代码的设计变得清晰了很多，没有多继承设计那种复杂的层级关系，只有一个层级，
+使用组合起来达到目的，让我想到了 Unix 里工具的设计思想，可以通过管道（pipeline）自由组合。\\
+例如批量杀进程： =ps aux | grep 'foo' | awk '{print $1}' | xargs kill -9=
+
+Mixin 和多继承实现机制是一样的，他们的不同体现在设计思想的不同，理解了 MRO 有助于我们更好的设计代码。
+
+** 3. Python 中的类方法，静态方法和实例方法
 *** 静态方法
 #+BEGIN_SRC python
 class Foo(object):
@@ -49,9 +221,9 @@ class Foo(object):
     @staticmethod
     def do_something():
         '''
-           无法访问类属性、实例属性，相当于一个相对独立的方法，
-           跟类其实没什么关系，换个角度来讲，其实就是放在一个
-           类的作用域里的函数而已。
+        无法访问类属性、实例属性，相当于一个相对独立的方法，
+        跟类其实没什么关系，换个角度来讲，其实就是放在一个
+        类的作用域里的函数而已。
         '''
         print 'I am just a static method'
 
@@ -115,76 +287,14 @@ f.instance_do()
 #+END_SRC
 
 *** 小结
-1. python的类方法可以用来写工具类。
+1. python 的类方法可以用来写工具类。
 2. 静态方法暂时没有想到他的具体用途
 
-** Python 中的继承方法执行顺序MRO(method resolution order)
-old school使用深度优先从左到右解析，new school使用C3算法，总而言之，
-代码里面不要把old school和new school混合。
-** Mixin 和多继承有什么区别和应用场景
-*** 什么是Mixin
-个人觉得mixin是一种多继承机制，它的作用是，在运行期间，动态改变类\\
-的基类或类的方法，从而使得类的表现可以发生变化。\\
-
-注意：是在运行期间动态的改变类的基类或类的方法。\\
-
-*** 什么时候需要Mixin [[http:////xiaocong.github.io/blog/2012/06/13/python-mixin-and-mro/][参考这篇文章]]
-1. 你希望给一个类提供很多可选的特征(feature).
-2. 你希望在很多不同的类中使用一个特定的特征(feature).
-
-*** 关于Mixin 的思考
-mixin无非是为了扩展类的方法，至于是动态的改变还是怎么去改变，我觉得\\
-没有必要去在意这些细节，如果你想为一个类实现扩展而不想去改这个类的代码\\
-你就用mixin也就是多继承去实现吧，至于是运行期间改变还是什么时候去改变，\\
-完全由你的业务和你要解决的问题决定。
-
-*** 实例分析
-#+BEGIN_SRC python
-class GenericFeature1(object):
-    '''
-       通用feature1
-    '''
-    def generic_do1(self):
-        pass
-
-
-class GenericFeature2(object):
-    '''
-       通用feature2
-    '''
-    def generic_do2(self):
-        pass
-
-
-class Foo(GenericFeature1, GenericFeature2):
-    '''
-       定义一个类，它所有的方法已经明确。
-    '''
-    def dothing1(self):
-        pass
-
-    def dothing2(self):
-        pass
-
-# 如果想要给类添加新的feature，有两种方案，一种是直接在类里面添加，
-# 一种是通过多继承，来扩展类的功能，具体使用哪种方法还是看你的业务和
-# 面临的问题，如果这个feature其他的类也会用到，就使用多继承的方式，如果
-# 只有一个类用到，直接添加即可，设计本身是一个反复的过程，只有不断的
-# 雕琢和打磨才能创造出优雅的设计。
-
-#+END_SRC
-
 ** 总结
-1. 面向对象的思想其实和UNIX的设计思想其实是一致，K.I.S.S
-2. 组合优于继承，继承的结构不宜太多，我比较欣赏单一继承结构
-3. Mixin其实还是解决高内聚，低耦合的问题
-4. 总而言之，K.I.S.S
+1. 面向对象的思想其实和 UNIX 的设计思想其实是一致，K.I.S.S。
+2. 组合优于继承，继承的层次不宜太多，单一继承结构最好。
 
 ** 参考
-#+begin_quote
-[[http:////www.libaoyin.com/2013/08/06/pyhton-staticmethod-classmethod/][python静态方法和类方法]] \\
+[[http:////www.libaoyin.com/2013/08/06/pyhton-staticmethod-classmethod/][python 静态方法和类方法]] \\
 [[http:////xiaocong.github.io/blog/2012/06/13/python-mixin-and-mro/][Python Mixin and MRO]] \\
-
-#+END_QUOTE
-
-{{{more}}}
+[[https:////github.com/zhouhaibing089/Blog/][{译}The Python 2.3 Method Resolution Order]] \\
